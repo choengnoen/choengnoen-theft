@@ -1277,7 +1277,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   <div class="view" id="view-routes">
     <div class="card">
       <div class="assets-toolbar" style="justify-content:flex-end">
-        <button class="btn btn-outline btn-sm" id="btnAddRoute" type="button" style="display:none">+ เพิ่มสายทาง</button>
         <div class="assets-updated-badge" id="routesUpdatedHint"></div>
       </div>
       <div class="table-wrap">
@@ -1310,7 +1309,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <select id="zonesFilterStation"></select>
           </div>
         </div>
-        <button class="btn btn-outline btn-sm" id="btnAddZone" type="button" style="display:none">+ เพิ่มเขตพื้นที่</button>
         <div class="assets-updated-badge" id="zonesCountHint"></div>
       </div>
       <div class="table-wrap">
@@ -1336,7 +1334,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <input type="text" id="assetsSearchBox" name="asset-filter" autocomplete="off" placeholder="พิมพ์ค้นหารายการทรัพย์สิน...">
           <button type="button" class="assets-search-clear" id="assetsSearchClear" title="ล้างคำค้นหา">✕</button>
         </div>
-        <button class="btn btn-outline btn-sm" id="btnAddAsset" type="button" style="display:none"></button>
         <div class="assets-updated-badge" id="assetsUpdatedHint"></div>
       </div>
       <div class="asset-category-chips" id="assetCategoryChips"></div>
@@ -1370,11 +1367,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
       <div class="card" id="cardTrash">
         <div class="section-title">🗑 ถังขยะ</div>
         <button class="btn btn-outline" id="btnOpenTrash">เปิดถังขยะ</button>
-      </div>
-      <div class="card" id="cardSeed" style="display:none">
-        <div class="section-title">🌱 ข้อมูลอ้างอิงตั้งต้น</div>
-        <button class="btn btn-outline" id="btnSeed" type="button">เติมข้อมูลตั้งต้น</button>
-        <div id="seedLog" class="import-log"></div>
       </div>
       <div class="card" id="cardImport" style="display:none">
         <div class="section-title">⬆ นำเข้าจากระบบเดิม</div>
@@ -1993,65 +1985,6 @@ function hookMasterChanges(){
   if (masterHooked || !window.CNMaster) return;
   masterHooked = true;
   CNMaster.onChange(onMasterChange);
-}
-// ลิงก์ไปแท็บในหน้าฐานข้อมูลกลาง: 'routes' = สายทาง, 'zones' = เขตพื้นที่, 'assets' = ราคาประเมินทรัพย์สิน
-function masterUrl(tab){
-  if (!window.CNMaster) return '#';
-  return (CNMaster.EDIT_URL || '') + (tab ? '#' + tab : '');
-}
-function masterEditLink(tab, label){
-  return `<a href="${masterUrl(tab)}" target="_blank" rel="noopener">${escapeHtml(label || 'แก้ไขที่ฐานข้อมูลกลาง ↗')}</a>`;
-}
-function showMasterEditInfo(what, tab){
-  const root = document.getElementById('modalRoot');
-  root.innerHTML = `
-    <div class="modal-backdrop"><div class="modal">
-      <div class="modal-head"><h3>แก้ไข${escapeHtml(what)}</h3><button class="modal-close" id="masterInfoClose" type="button">×</button></div>
-      <p>แก้ได้ที่ฐานข้อมูลกลาง ทุกระบบเห็นข้อมูลใหม่ทันที${tab === 'assets' ? '<br><span class="hint">เคสเดิมไม่เปลี่ยนราคา</span>' : ''}</p>
-      <div class="actions">
-        <button class="btn btn-outline" id="masterInfoCancel" type="button">ปิด</button>
-        <a class="btn btn-primary" style="text-decoration:none" href="${masterUrl(tab)}" target="_blank" rel="noopener">เปิดฐานข้อมูลกลาง ↗</a>
-      </div>
-    </div></div>`;
-  document.getElementById('masterInfoClose').onclick = () => { root.innerHTML = ''; };
-  document.getElementById('masterInfoCancel').onclick = () => { root.innerHTML = ''; };
-}
-function downloadJson(obj, filename){
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
-// รายการทรัพย์สินที่มีเฉพาะในระบบนี้ (ยังไม่มีในฐานกลาง) → ไฟล์ JSON สำหรับนำเข้าที่หน้าฐานข้อมูลกลาง
-// รหัสขึ้นต้น "thf-" เสมอ กันชนกับรหัสในฐานกลาง (รหัสเดิมของระบบนี้อาจซ้ำ เช่น mat-002 แต่เป็นคนละรายการ)
-function exportLocalOnlyAssets(){
-  const out = [];
-  Object.keys(materialPriceMap).forEach(name => {
-    const m = materialPriceMap[name];
-    if (m.fromMaster || m.hidden) return;
-    out.push({ key: 'thf-' + (m.key || (Date.now().toString(36) + out.length)), name, unit: m.unit, price: m.price, category: m.category || classifyAssetCategoryFallback(name), frequent: !!m.frequent });
-  });
-  getAllAssetItems().forEach(it => {
-    if (materialPriceMap[it.name]) return;
-    out.push({ key: 'thf-lib-' + out.length, name: it.name, unit: it.unit, price: it.price, category: classifyAssetCategoryFallback(it.name), frequent: true });
-  });
-  if (!out.length) { showToast('ทุกรายการมีอยู่ในฐานข้อมูลกลางแล้ว'); return; }
-  downloadJson({ note: 'รายการทรัพย์สินที่มีเฉพาะในระบบงานโจรกรรม — นำเข้าที่ฐานข้อมูลกลาง แท็บ "นำเข้า / ส่งออก"', materials: out },
-    'theft-assets-for-master-' + new Date().toISOString().slice(0, 10) + '.json');
-  showToast('ส่งออก ' + out.length + ' รายการ — นำไฟล์ไปนำเข้าที่ฐานข้อมูลกลาง');
-}
-// เขตพื้นที่ของระบบนี้ → ไฟล์ JSON สำหรับนำเข้าที่ฐานข้อมูลกลาง (ใช้ครั้งเดียวตอนย้ายเข้าฐานกลาง)
-function exportZonesForMaster(){
-  if (!ZONES.length) { showToast('ยังไม่มีเขตพื้นที่ให้ส่งออก'); return; }
-  const zones = ZONES.map(z => ({
-    id: z.id, highway: z.highway, kmStart: z.kmStart, kmEnd: z.kmEnd, side: z.side || '',
-    station: z.station, tambon: z.tambon, amphoe: z.amphoe, changwat: z.changwat, moobans: z.moobans || []
-  }));
-  downloadJson({ note: 'เขตพื้นที่รับผิดชอบจากระบบงานโจรกรรม — นำเข้าที่ฐานข้อมูลกลาง แท็บ "นำเข้า / ส่งออก"', zones },
-    'theft-zones-for-master-' + new Date().toISOString().slice(0, 10) + '.json');
-  showToast('ส่งออกเขตพื้นที่ ' + zones.length + ' เขต — นำไฟล์ไปนำเข้าที่ฐานข้อมูลกลาง');
 }
 // ค่าตั้งต้นแก้ได้จากหน้าตั้งค่า (คอลเลกชัน settings) — settings/assignees = รายชื่อผู้รับมอบหมายแจ้งความทั้งหมด (คนเก่า+คนปัจจุบัน) + currentName = คนที่ใช้งานอยู่
 function applySettingsDocs(docs){
@@ -5230,9 +5163,6 @@ function renderRoutesTable(){
   }
   tbody.innerHTML = html;
 
-  // สายทางแก้ได้ที่ฐานข้อมูลกลางเท่านั้น — ระบบนี้ไม่มีปุ่ม/ลิงก์แก้ไข (รวมตอนต่อฐานกลางไม่ได้)
-  const addBtn = document.getElementById('btnAddRoute');
-  if (addBtn) addBtn.style.display = 'none';
   updateRoutesUpdatedHint();
 }
 
@@ -5251,7 +5181,7 @@ function parseKmRangesText(text){
 }
 // โมดัลเพิ่ม/แก้ไขสายทาง 1 สาย — ส่ง route เป็น null เพื่อเปิดในโหมด "เพิ่มสายทางใหม่", ส่ง object เพื่อแก้ไขของเดิม (เฉพาะเจ้าของระบบ)
 // preset = { status: 'transferred' } ใช้ตอนกดมาจากหน้าลบสายทางที่มีเคสอยู่ เพื่อเลือก "โอนแล้ว" ไว้ให้
-function openRouteEditModal(route, preset){
+function openRouteEditModal(route, preset){ return; // ปิดการใช้งาน: สายทางเป็นข้อมูลกลาง ดูได้อย่างเดียว
   const root = document.getElementById('modalRoot');
   const isNew = !route;
   const r = route || { highway:'', controlNo:'', section:'', kmRanges:[], distanceActual:null, distance2Lane:null, asphalt:null, concrete:null, workQty:null, status:'active' };
@@ -5413,7 +5343,7 @@ function updateRoutesUpdatedHint(){
   if (!el) return;
   if (masterRoutesOn) {
     const upd = normalizeDateStr(CNMaster.updatedAt('routes'));
-    el.innerHTML = 'จากฐานข้อมูลกลาง' + (upd ? ' · อัปเดต ' + escapeHtml(formatThaiDate(upd)) : '') + '';
+    el.innerHTML = 'ข้อมูลจากฐานข้อมูลกลาง' + (upd ? ' · อัปเดต ' + escapeHtml(formatThaiDate(upd)) : '');
     return;
   }
   const dates = ROUTES.map(r => r.updatedAt).filter(Boolean).sort();
@@ -5604,7 +5534,7 @@ function renderAssetsPanel(){
     group.forEach(it => {
       rowsHtml.push(`
         <tr data-idx="${idx}" class="${it.frequent ? 'asset-frequent' : ''}">
-          <td>${escapeHtml(it.name)}${it.frequent ? '<span class="asset-frequent-badge">★ ใช้บ่อย</span>' : ''}${masterAssetsOn && !it.fromMaster ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ยังไม่มีในฐานข้อมูลกลาง — ส่งออกแล้วนำเข้าที่ฐานกลาง">เฉพาะระบบนี้</span>' : ''}${it.dupName ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ฐานข้อมูลกลางมีหลายรายการชื่อเดียวกัน">ชื่อซ้ำในฐานกลาง</span>' : ''}</td>
+          <td>${escapeHtml(it.name)}${it.frequent ? '<span class="asset-frequent-badge">★ ใช้บ่อย</span>' : ''}${masterAssetsOn && !it.fromMaster ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ยังไม่มีในฐานข้อมูลกลาง">เฉพาะระบบนี้</span>' : ''}${it.dupName ? '<span class="asset-frequent-badge" style="background:#FDE2E0;color:#B92A22" title="ฐานข้อมูลกลางมีหลายรายการชื่อเดียวกัน">ชื่อซ้ำในฐานกลาง</span>' : ''}</td>
           <td class="mono" style="text-align:center">${escapeHtml(it.unit)}</td>
           <td class="mono" style="text-align:center">${formatMoney(it.price)}</td>
         </tr>
@@ -5616,20 +5546,10 @@ function renderAssetsPanel(){
 
   tbody.innerHTML = rowsHtml.length ? rowsHtml.join('') : `<tr><td colspan="${colSpan}" class="hint" style="text-align:center;padding:20px">ไม่พบรายการที่ค้นหา</td></tr>`;
 
-  // ราคาประเมินแก้ได้ที่ฐานข้อมูลกลางเท่านั้น — ระบบนี้ไม่มีปุ่ม/ลิงก์แก้ไข (รวมตอนต่อฐานกลางไม่ได้)
-  // ปุ่มเดียวที่เหลือ = ส่งออกรายการเฉพาะระบบนี้ (ไม่แก้ข้อมูล) ไว้นำเข้าที่ฐานกลาง
-  const addBtn = document.getElementById('btnAddAsset');
-  if (addBtn) {
-    const n = masterAssetsOn ? allVisible.filter(it => !it.fromMaster).length : 0;
-    addBtn.textContent = 'ส่งออกรายการเฉพาะระบบนี้ (' + n + ')';
-    addBtn.title = 'ดาวน์โหลดรายการที่ยังไม่มีในฐานข้อมูลกลาง เพื่อนำเข้าที่หน้าฐานข้อมูลกลาง';
-    addBtn.style.display = owner && n ? '' : 'none';
-    addBtn.onclick = exportLocalOnlyAssets;
-  }
   updateAssetsUpdatedHint();
 }
 
-function openAssetEditModal(item){
+function openAssetEditModal(item){ return; // ปิดการใช้งาน: ราคาประเมินเป็นข้อมูลกลาง ดูได้อย่างเดียว
   const root = document.getElementById('modalRoot');
   const isNew = !item;
   const it = item || { name:'', unit:'', price:0, key:'', category:'', frequent:false };
@@ -5850,29 +5770,14 @@ function renderZonesTable(){
     </tr>`;
   tbody.innerHTML = rows.length ? rows.map(rowHtml).join('')
     : `<tr><td colspan="8" class="hint" style="text-align:center;padding:20px">${allSorted.length ? 'ไม่มีเขตพื้นที่ตรงกับตัวกรองนี้' : 'ยังไม่มีข้อมูลเขตพื้นที่'}</td></tr>`;
-  // เขตพื้นที่แก้ได้ที่ฐานข้อมูลกลางเท่านั้น — ระบบนี้ไม่มีปุ่ม/ลิงก์แก้ไข (รวมตอนต่อฐานกลางไม่ได้)
-  const addBtn = document.getElementById('btnAddZone');
-  if (addBtn) {
-    addBtn.style.display = 'none';
-    // ฐานกลางอ่านได้แต่ยังไม่มีเขตพื้นที่ → ปุ่มส่งออกเขตพื้นที่ของระบบนี้ไปนำเข้าที่ฐานกลาง (ย้ายครั้งเดียว)
-    let exp = document.getElementById('btnExportZones');
-    if (!exp) {
-      exp = document.createElement('button');
-      exp.id = 'btnExportZones'; exp.type = 'button'; exp.className = 'btn btn-outline btn-sm';
-      exp.textContent = 'ส่งออกเขตพื้นที่ไปฐานกลาง';
-      exp.onclick = exportZonesForMaster;
-      addBtn.insertAdjacentElement('afterend', exp);
-    }
-    exp.style.display = owner && masterReachable && !masterZonesOn && ZONES.length ? '' : 'none';
-  }
   const hint = document.getElementById('zonesCountHint');
   if (hint) {
     const count = rows.length ? (rows.length + (zonesFilterValue ? ' จาก ' + allSorted.length : '') + ' เขตพื้นที่') : '';
-    if (masterZonesOn) hint.innerHTML = escapeHtml(count) + ' · จากฐานข้อมูลกลาง';
+    if (masterZonesOn) hint.textContent = count + ' · ข้อมูลจากฐานข้อมูลกลาง';
     else hint.textContent = count;
   }
 }
-function openZoneEditModal(zone){
+function openZoneEditModal(zone){ return; // ปิดการใช้งาน: เขตพื้นที่เป็นข้อมูลกลาง ดูได้อย่างเดียว
   const root = document.getElementById('modalRoot');
   const isNew = !zone;
   const z = zone || { id: '', highway: '', kmStart: null, kmEnd: null, side: '', station: '', tambon: '', amphoe: '', changwat: '', moobans: [] };
@@ -6033,29 +5938,6 @@ function syncFiscalYearFromDate(){
 }
 
 
-/* ============ เติมข้อมูลอ้างอิงตั้งต้น (สายทาง + ราคากลางทรัพย์สิน) — เจ้าของระบบ ใช้ครั้งแรก ============ */
-async function runSeed(){
-  if (!isPrivileged()) { showToast('เฉพาะเจ้าของระบบหรือผู้ดูแลระบบเท่านั้น'); return; }
-  const btn = document.getElementById('btnSeed');
-  const log = document.getElementById('seedLog');
-  log.style.display = 'block';
-  log.textContent = 'กำลังอ่านข้อมูลตั้งต้น...';
-  btn.disabled = true;
-  try {
-    const res = await fetch('seed-reference.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('ไม่พบไฟล์ seed-reference.json (ต้องอัปโหลดไว้โฟลเดอร์เดียวกับ index.html)');
-    const seed = await res.json();
-    const report = await FBL.seedReference(seed, m => { log.textContent = m; });
-    log.textContent = '✓ เติมข้อมูลตั้งต้นสำเร็จ\n' + report.join('\n');
-    showToast('เติมข้อมูลตั้งต้นสำเร็จ');
-  } catch (e) {
-    console.error('seed failed', e);
-    log.textContent = '✗ เติมข้อมูลไม่สำเร็จ: ' + (e && (e.code ? FBL.errorText(e) : e.message) || e);
-  } finally {
-    btn.disabled = false;
-  }
-}
-
 async function init(){
   initModalScroll();
   initCustomSelects();
@@ -6132,7 +6014,6 @@ async function init(){
   });
   document.addEventListener('click', closeExportMenu);
   document.getElementById('btnImport').addEventListener('click', runImport);
-  document.getElementById('btnSeed').addEventListener('click', runSeed);
   document.getElementById('btnOpenTrash').addEventListener('click', openTrashModal);
   document.getElementById('btnAddAssignee').addEventListener('click', () => addAssigneeRow());
   document.getElementById('btnSaveAssignee').addEventListener('click', async () => {
