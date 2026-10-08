@@ -883,6 +883,12 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .auth-error{color:var(--rust);background:var(--rust-bg);padding:8px 10px;border-radius:8px;margin:0 0 12px}
 .auth-btn{width:100%;justify-content:center}
 #importLog,#seedLog{display:none;white-space:pre-wrap;background:var(--paper-2);border-radius:8px;padding:10px 12px;font-size:13px;margin-top:12px}
+/* ปุ่มหลักสีส้ม: เส้นใต้แท็บที่เลือก + ปุ่ม "ทุกปีงบประมาณ" ในแท็บภาพรวม ใช้สไตล์เดียวกับ .btn-primary */
+.tab-btn{border-bottom-width:3px}
+.tab-btn.active{border-bottom-color:transparent;background:linear-gradient(135deg,var(--amber-500),var(--amber)) bottom/100% 3px no-repeat border-box}
+#dashYearFilter button,.year-dropdown-btn{font-family:'Kanit',sans-serif;font-weight:600;font-size:14px;border-radius:10px;padding:9px 17px}
+#dashYearFilter button.active,.year-dropdown-btn.active{background:linear-gradient(135deg,var(--amber-500),var(--amber));color:#fff;border-color:transparent;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
+#dashYearFilter button.active:hover,.year-dropdown-btn.active:hover{filter:brightness(1.06);color:#fff}
 </style>
 
 <body>
