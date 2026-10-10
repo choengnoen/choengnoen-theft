@@ -1378,11 +1378,11 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <div class="pill-filter" id="dashYearFilter" style="margin-bottom:16px"></div>
 
     <div class="stat-cards">
-      <div class="stat-card"><div class="big mono" id="statTotal">0</div><div class="lbl">คดีโจรกรรมทั้งหมด (คดี)</div></div>
+      <div class="stat-card"><div class="big mono" id="statTotal">0</div><div class="lbl">โจรกรรมทั้งหมด (เรื่อง)</div></div>
       <div class="stat-card amber"><div class="big mono" id="statValue">0</div><div class="lbl">มูลค่าความเสียหาย (บาท)</div></div>
-      <div class="stat-card green clickable" id="cardClosed"><div class="big mono" id="statClosed">0</div><div class="lbl">ปิดคดีแล้ว (คดี)</div></div>
-      <div class="stat-card rust clickable" id="cardOpen"><div class="big mono" id="statOpen">0</div><div class="lbl">ยังไม่ปิดคดี (คดี)</div></div>
-      <div class="stat-card ins clickable" id="cardArrest" title="คดีที่จับกุมผู้ต้องหาได้แล้ว รอ สภ. เรียกสอบปากคำก่อนปิดคดี"><div class="big mono" id="statArrest">0</div><div class="lbl">รอสอบปากคำ (คดี)</div></div>
+      <div class="stat-card green clickable" id="cardClosed"><div class="big mono" id="statClosed">0</div><div class="lbl">เสร็จสิ้น (เรื่อง)</div></div>
+      <div class="stat-card rust clickable" id="cardOpen"><div class="big mono" id="statOpen">0</div><div class="lbl">ไม่เสร็จสิ้น (เรื่อง)</div></div>
+      <div class="stat-card ins clickable" id="cardArrest" title="คดีที่จับกุมผู้ต้องหาได้แล้ว รอ สภ. เรียกสอบปากคำก่อนปิดคดี"><div class="big mono" id="statArrest">0</div><div class="lbl">รอสอบปากคำ (เรื่อง)</div></div>
     </div>
 
     <div class="grid grid-2" id="dashFirstRow">
@@ -5064,7 +5064,7 @@ function renderFlowRoundabout(host, opt){
   });
   const hasLoop = st.some(s => s.loop);
   host.innerHTML = `<div class="rb-wrap" style="--c1:${th[0]};--c2:${th[1]}">
-    <div class="rb-head"><span class="rb-hic">${rbSvg(th[2], 20)}</span><span class="rb-t">${esc(opt.title)}</span>
+    <div class="rb-head"><span class="rb-t">${esc(opt.title)}</span>
       <span class="rb-lg"><span><span class="c"></span>ธุรการ</span><span><span class="d"></span>หัวหน้า</span>${hasLoop ? '<span><span class="w"></span>วนแก้ไข</span>' : ''}</span></div>
     <div class="rb-box"><div class="rb-cv">${svg}${h}</div></div></div>`;
   /* ย่อผังให้พอดีหน้าจอแคบ (ผังออกแบบไว้กว้าง 680px) */
