@@ -1437,14 +1437,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <div class="section-title">🗑 ถังขยะ</div>
         <button class="btn btn-outline" id="btnOpenTrash">เปิดถังขยะ</button>
       </div>
-      <div class="card" id="cardImport" style="display:none">
-        <div class="section-title">⬆ นำเข้าจากระบบเดิม</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input type="file" id="importFile" accept=".xlsx" style="max-width:100%">
-          <button class="btn btn-primary" id="btnImport" type="button">เริ่มนำเข้า</button>
-        </div>
-        <div id="importLog"></div>
-      </div>
     </div>
     <div class="card">
       <div class="section-title">เกี่ยวกับข้อมูล</div>
@@ -2387,8 +2379,6 @@ function updateWhoDisplay(){
   const trashCard = document.getElementById('cardTrash');
   if (teamCard) teamCard.style.display = recorderName ? '' : 'none';
   if (trashCard) trashCard.style.display = recorderName ? '' : 'none';
-  const importCard = document.getElementById('cardImport');
-  if (importCard) importCard.style.display = isPrivileged() ? '' : 'none';
   const seedCard = document.getElementById('cardSeed');
   if (seedCard) seedCard.style.display = isPrivileged() ? '' : 'none';
   const assigneeCard = document.getElementById('cardAssignee');
@@ -2525,7 +2515,7 @@ async function renderDirNotice(){
   if (!document.getElementById('dirNotice')) return;
   const bad = st.missing.length + st.extra.length;
   if (st.ready && !bad) {
-    box.innerHTML = '<p class="hint" style="margin-top:14px">🔒 สมุดชื่อล็อกอิน: ย้ายแล้ว — คนที่ยังไม่ล็อกอินมองไม่เห็นว่าใครเป็นเจ้าของ/ผู้ดูแลระบบ</p>';
+    box.innerHTML = '';
     return;
   }
   const why = !st.ready
@@ -4135,28 +4125,6 @@ async function startApp(){
   startPresenceTracking();
 }
 
-/* ============ นำเข้าข้อมูลจากไฟล์ Excel ของระบบเดิม (เจ้าของระบบ ครั้งเดียว) ============ */
-async function runImport(){
-  if (!isPrivileged()) { showToast('เฉพาะเจ้าของระบบหรือผู้ดูแลระบบเท่านั้น'); return; }
-  const file = document.getElementById('importFile').files[0];
-  if (!file) { showToast('เลือกไฟล์ Excel ก่อน'); return; }
-  const btn = document.getElementById('btnImport');
-  const log = document.getElementById('importLog');
-  log.style.display = 'block';
-  log.textContent = 'กำลังอ่านไฟล์...';
-  btn.disabled = true;
-  try {
-    const buf = await file.arrayBuffer();
-    const report = await FBL.importWorkbook(XLSX, buf, m => { log.textContent = m; });
-    log.textContent = '✓ นำเข้าสำเร็จ\n' + report.join('\n') + '\n\nรันซ้ำได้ปลอดภัย (เขียนทับรายการเดิม ไม่เกิดซ้ำ)';
-    showToast('นำเข้าข้อมูลสำเร็จ');
-  } catch (e) {
-    console.error('import failed', e);
-    log.textContent = '✗ นำเข้าไม่สำเร็จ: ' + FBL.errorText(e);
-  } finally {
-    btn.disabled = false;
-  }
-}
 
 
 function computeSeqMap(){
@@ -6382,7 +6350,6 @@ async function init(){
     if (b) runExport(document.getElementById('exportMenu').dataset.kind, b.dataset.scope);
   });
   document.addEventListener('click', closeExportMenu);
-  document.getElementById('btnImport').addEventListener('click', runImport);
   document.getElementById('btnOpenTrash').addEventListener('click', openTrashModal);
   document.getElementById('btnAddAssignee').addEventListener('click', () => addAssigneeRow());
   document.getElementById('btnSaveAssignee').addEventListener('click', async () => {
