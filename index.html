@@ -900,6 +900,40 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 #dashYearFilter button,.year-dropdown-btn{font-family:'Kanit',sans-serif;font-weight:600}
 #dashYearFilter button.active,.year-dropdown-btn.active{background:linear-gradient(135deg,var(--amber-500),var(--amber));color:#fff;border-color:transparent;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
 #dashYearFilter button.active:hover,.year-dropdown-btn.active:hover{filter:brightness(1.06);color:#fff}
+/* ===== แท็บ "เอกสาร": ผังกระบวนงาน + เอกสารที่ต้องใช้ ===== */
+.gd-flow{max-width:760px;margin:4px auto 0}
+.gd-step{display:grid;grid-template-columns:minmax(110px,210px) 1fr;gap:14px;align-items:center}
+.gd-who{text-align:right;font-weight:600;font-size:13.5px;color:var(--ink-soft)}
+.gd-who b{font-family:'Kanit',sans-serif;color:var(--amber-deep)}
+.gd-shape{justify-self:center;text-align:center;font-size:14px;line-height:1.45;background:#fff;border:1.5px solid var(--ink);padding:10px 16px;min-width:230px;max-width:100%}
+.gd-shape.box{border-radius:6px}
+.gd-shape.oval{border-radius:999px;padding:12px 26px}
+.gd-shape.dia{position:relative;border:0;background:transparent;padding:26px 44px;min-width:210px}
+.gd-shape.dia::before,.gd-shape.dia::after{content:'';position:absolute;z-index:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.gd-shape.dia::before{inset:0;background:var(--ink)}
+.gd-shape.dia::after{inset:1.5px;background:#fff}
+.gd-shape.dia span{position:relative;z-index:1}
+.gd-arrow{display:grid;grid-template-columns:minmax(110px,210px) 1fr;gap:14px;font-size:12.5px;color:var(--ink-mute);padding:3px 0}
+.gd-arrow div{grid-column:2;display:flex;justify-content:center;gap:26px;align-items:center}
+.gd-arrow i{font-style:normal;color:var(--ink);font-size:16px;line-height:1}
+.gd-sub{font-size:13px;color:var(--ink-mute);margin:0 0 8px}
+.gd-tag{display:inline-block;border-radius:6px;padding:0 7px;font-size:11.5px;font-weight:600;background:var(--paper-2);color:var(--ink-soft);margin-left:6px}
+.gd-h{font-family:'Kanit',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink);margin:12px 0 4px}
+.gd-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.6}
+.gd-ol ul{margin:2px 0 4px;padding-left:18px;color:var(--ink-soft)}
+.gd-ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.gd-doc{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.gd-doc:last-child{border-bottom:0}
+.gd-doc .ic{flex:none;width:20px;text-align:right;color:var(--ink-mute)}
+.gd-doc .q{margin-left:auto;font-size:12.5px;color:var(--ink-mute);white-space:nowrap}
+.gd-doc small{color:var(--amber-deep)}
+.gd-meta{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink-soft)}
+.gd-meta b{color:var(--ink)}
+@media(max-width:560px){.gd-step,.gd-arrow{grid-template-columns:1fr;gap:4px}.gd-who{text-align:left}.gd-arrow div{grid-column:1}.gd-shape{min-width:0;width:100%}}
+
+/* ชิปตัวกรองที่เลือก (สายทาง/pill) ให้เหมือนปุ่ม "ทุกปีงบประมาณ" */
+.hw-tab-filter button.active,.pill-filter button.active{font-family:'Kanit',sans-serif;font-weight:600;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
+.hw-tab-filter button.active:hover,.pill-filter button.active:hover{filter:brightness(1.06);color:#fff}
 /* ===== รูปถ่ายประกอบเคส (ไม่เกิน 2 รูป · เก็บใน Google Drive) ===== */
 .ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.ph-grid{grid-template-columns:1fr}}
@@ -982,6 +1016,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <button class="tab-btn active" data-view="dash">ภาพรวม</button>
     <button class="tab-btn" data-view="list">รายการโจรกรรม</button>
     <button class="tab-btn" data-view="form">＋ รายการใหม่</button>
+    <button class="tab-btn" data-view="guide">เอกสาร</button>
     <button class="tab-btn" data-view="routes">ข้อมูลสายทาง</button>
     <button class="tab-btn" data-view="assets">ข้อมูลทรัพย์สิน</button>
     <button class="tab-btn" data-view="zones">ข้อมูล สภ.</button>
@@ -1351,6 +1386,9 @@ tr.route-editable:hover td{background:var(--amber-glow)}
   </div>
 
   <!-- ===================== ROUTES ===================== -->
+  <!-- ===================== GUIDE (เอกสาร) ===================== -->
+  <div class="view" id="view-guide"><div id="guideRoot"></div></div>
+
   <div class="view" id="view-routes">
     <div class="card">
       <div class="assets-toolbar" style="justify-content:flex-end">
@@ -2792,6 +2830,7 @@ function initTabs(){
       if (btn.dataset.view === 'settings') renderTeamPanel();
       if (btn.dataset.view === 'assets') renderAssetsPanel();
       if (btn.dataset.view === 'routes') renderRoutesTable();
+      if (btn.dataset.view === 'guide') renderGuide();
       if (btn.dataset.view === 'form' && window.DRAFTS) DRAFTS.render();
       if (btn.dataset.view === 'zones') renderZonesTable();
       recordViewInHistory(btn.dataset.view);
@@ -4874,7 +4913,7 @@ function renderFollowUp(){
       ${years.map(y => `<div class="backlog-row" data-fy="${escapeHtml(String(y))}"><span>${escapeHtml(String(y))}</span><div class="mini-track"><i style="width:${Math.round(byFy[y] / maxN * 100)}%"></i></div><b class="mono" style="text-align:right">${byFy[y]}</b></div>`).join('')}`;
   }
 
-  el.innerHTML = statsHtml + recentHtml + backlogHtml;
+  el.innerHTML = statsHtml + backlogHtml;   // ไม่แสดงรายการคดีค้าง
   const goList = (year, hw) => {
     goToFilteredList(year, 'open');
     if (hw !== undefined) { document.getElementById('filterHighway').value = hw; renderTable(); }
@@ -4889,6 +4928,96 @@ function renderFollowUp(){
   if (olderLink) olderLink.onclick = () => goList(fyMode ? dashYear : 'ทั้งหมด');
 }
 
+
+/* ข้อมูลแท็บ "เอกสาร" — ระบบงานโจรกรรม (ที่มา: ผังกระบวนงานสถิติหมวดการทาง งานการรายงานต่างๆ ข้อ 8) */
+const GUIDE_DATA = {
+  flowTitle: 'ผังกระบวนงานสถิติหมวดการทาง · กระบวนงานการจัดทำรายงาน (การโจรกรรมอุปกรณ์งานทาง/ ภัยแล้ง/ ไฟไหม้ในเขตทางหลวง)',
+  flow: [
+    { who: 'ธุรการหมวดการทาง', shape: 'oval', text: 'รับทราบว่า มีการโจรกรรม/ช่วยเหลือ\nภัยแล้ง/ไฟไหม้ในเขตทางหลวง' },
+    { who: 'ธุรการหมวดการทาง', shape: 'box', text: 'จัดทำข้อมูล พร้อมรวบรวมเอกสาร' },
+    { who: 'หัวหน้าหมวดการทาง', shape: 'dia', text: 'ตรวจสอบ/\nลงนาม', loop: true },
+    { who: 'ธุรการหมวดการทาง', shape: 'box', text: 'ออกเลข/ทำสำเนา/ลงสมุดส่ง' },
+    { who: 'ธุรการหมวดการทาง', shape: 'oval', text: 'เก็บสำเนาเอกสาร' }
+  ],
+  docTitle: 'เอกสารที่ต้องใช้แยกตามประเภทงาน',
+  sections: [
+    {
+      title: '8.1 การโจรกรรมอุปกรณ์งานทาง', tag: '8. งานการรายงานต่างๆ',
+      steps: [
+        { text: 'หากมีการตรวจพบว่า มีการโจรกรรมอุปกรณ์งานทาง ให้จัดทำรายงานเป็นบันทึก โดยมีรายละเอียดวันที่เวลาที่ตรวจพบ สถานที่ กม. สายทาง ทรัพย์สิน ชนิด จำนวนที่สูญหาย ประมาณราคา และหัวหน้าหมวดการทางต้องดำเนินการแจ้งความร้องทุกข์กับพนักงานสอบสวน (ตำรวจ)' },
+        { text: 'นำบันทึก ให้หัวหน้าหมวดการทางลงนาม และนำส่งพร้อมรายงานประจำวันเกี่ยวกับคดีของพนักงานสอบสวน (ตำรวจ) เสนอผู้บังคับบัญชาต่อไป' }
+      ],
+      forms: ['บันทึกข้อความ'],
+      docs: [
+        { label: 'บันทึกข้อความ', qty: '1 ฉบับ' },
+        { label: 'รายงานประจำวันเกี่ยวกับคดีของพนักงานสอบสวน (ตำรวจ)', qty: '1 ชุด' },
+        { label: 'ภาพถ่ายบริเวณ/จุดที่มีการโจรกรรม', qty: '1 ชุด' },
+        { label: 'แผนผังแสดงบริเวณที่ถูกโจรกรรม', qty: '1 ชุด' },
+        { label: 'รายการประเมินราคาค่าเสียหาย', qty: '1 ชุด' }
+      ],
+      due: 'ทันทีที่ตรวจพบ', keep: 'เก็บสำเนา 1 ชุด'
+    },
+    {
+      title: '8.2 งานการรายงานภัยแล้ง', tag: '8. งานการรายงานต่างๆ',
+      steps: [
+        { text: 'กรณีได้รับการขอความช่วยเหลือจากจังหวัด/องค์กรปกครองส่วนท้องถิ่น ในเรื่องการให้ความช่วยเหลือภัยแล้ง (การแจกจ่ายน้ำ) บันทึกข้อมูลตามแบบรายงานภัยแล้ง โดยหัวหน้าหมวดการทางลงนาม เสนอหน่วยเหนือต่อไป' }
+      ],
+      forms: ['แบบรายงานภัยแล้ง'],
+      docs: [
+        { label: 'แบบรายงานภัยแล้ง', qty: '1 ชุด' },
+        { label: 'ภาพถ่ายการให้ความช่วยเหลือ', qty: '1 ชุด' }
+      ],
+      due: 'ทุกวันที่ 25 ของเดือน', keep: 'เก็บสำเนา 1 ชุด'
+    },
+    {
+      title: '8.3 งานการรายงานไฟไหม้ในเขตทางหลวง', tag: '8. งานการรายงานต่างๆ',
+      steps: [
+        { text: 'กรณีมีไฟไหม้หญ้าในเขตทางหลวง ให้บันทึกในแบบรายงาน โดยหัวหน้าหมวดการทางลงนาม เสนอหน่วยเหนือต่อไป' },
+        { text: 'กรณีไม่มีเหตุการณ์ดังกล่าว ให้จัดทำบันทึก โดยหัวหน้าหมวดการทางลงนาม เสนอผู้บังคับบัญชาต่อไป' }
+      ],
+      forms: ['แบบรายงานไฟป่า การเผาในที่โล่ง และการเผาหญ้าในพื้นที่สองข้างทาง', 'บันทึกข้อความ'],
+      docs: [
+        { label: 'แบบรายงานไฟป่า การเผาในที่โล่ง และการเผาหญ้าในพื้นที่สองข้างทาง', qty: '1 ชุด' },
+        { label: 'ภาพถ่ายการดับไฟ', qty: '1 ชุด' },
+        { label: 'บันทึกข้อความ', cond: 'กรณีไม่มีเหตุการณ์' }
+      ],
+      due: 'ทุกวันที่ 25 ของเดือน', keep: 'เก็บสำเนา 1 ชุด'
+    }
+  ]
+};
+
+/* ============ เอกสาร: ผังกระบวนงาน + เอกสารที่ต้องใช้ (ข้อมูลอยู่ใน GUIDE_DATA ด้านบน) ============ */
+function renderGuide(){
+  const root = document.getElementById('guideRoot');
+  if (!root) return;
+  const G = GUIDE_DATA, esc = escapeHtml;
+  const flowHtml = G.flow.map((s, i) => {
+    const arrow = i === 0 ? '' : `<div class="gd-arrow"><div>${s.loop ? '<span><i>↓</i> ถูกต้อง</span><span><i>↑</i> ไม่ถูกต้อง (กลับไปแก้ไข)</span>' : '<i>↓</i>'}</div></div>`;
+    return `${arrow}<div class="gd-step"><div class="gd-who"><b>${i + 1}.</b> ${esc(s.who)}</div><div class="gd-shape ${s.shape}"><span>${esc(s.text).replace(/\n/g, '<br>')}</span></div></div>`;
+  }).join('');
+  const secHtml = G.sections.map(t => `
+    <div class="cd-card" style="margin-bottom:10px">
+      <div class="cd-sec" style="flex-wrap:wrap"><span>${esc(t.title)}</span>${t.tag ? `<span class="gd-tag">${esc(t.tag)}</span>` : ''}</div>
+      <div class="gd-h" style="margin-top:0">รายละเอียดการปฏิบัติงาน</div>
+      <ol class="gd-ol">${t.steps.map(s => `<li>${esc(s.text)}${s.subs ? `<ul>${s.subs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>
+      ${t.forms && t.forms.length ? `<div class="gd-h">แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</div><ul class="gd-ul">${t.forms.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      <div class="gd-h">เอกสารหลักฐานที่ต้องจัดส่ง</div>
+      ${t.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}${d.cond ? ` <small>(${esc(d.cond)})</small>` : ''}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}
+      ${t.extra ? `<div class="gd-h">${esc(t.extra.title)}</div>${t.extra.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}` : ''}
+      <div class="gd-meta"><span>กำหนดส่งรายงาน: <b>${esc(t.due)}</b></span><span>การจัดเก็บสำเนา: <b>${esc(t.keep)}</b></span></div>
+    </div>`).join('');
+  root.innerHTML = `
+    <div class="card">
+      <div class="section-title">${esc(G.flowTitle)}</div>
+      <div class="gd-flow">${flowHtml}</div>
+      ${G.flowNote ? `<p class="hint" style="margin:12px 0 0">${esc(G.flowNote)}</p>` : ''}
+    </div>
+    <div class="card">
+      <div class="section-title">${esc(G.docTitle)}</div>
+      ${secHtml}
+      ${G.docNote ? `<p class="hint" style="margin:6px 0 0">${esc(G.docNote)}</p>` : ''}
+    </div>`;
+}
 
 function goToFilteredList(fiscalYear, status){
   document.querySelector('.tab-btn[data-view="list"]').click();
