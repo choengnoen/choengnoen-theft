@@ -1327,6 +1327,10 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <select id="filterHighway"><option value="">ทั้งหมด</option></select>
         </div>
         <div class="field">
+          <label style="text-align:center">สภ.</label>
+          <select id="filterStation"><option value="">ทั้งหมด</option></select>
+        </div>
+        <div class="field">
           <label style="text-align:center">สถานะคดี</label>
           <select id="filterStatus">
             <option value="">ทั้งหมด</option>
@@ -1344,13 +1348,6 @@ tr.route-editable:hover td{background:var(--amber-glow)}
             <option value="yes">พบ</option>
             <option value="no">ไม่พบ</option>
             <option value="unknown">ยังไม่ระบุ</option>
-          </select>
-        </div>
-        <div class="field">
-          <label style="text-align:center">ตรวจสอบข้อมูล</label>
-          <select id="filterIssues">
-            <option value="">ทั้งหมด</option>
-            <option value="yes">⚠️ ต้องตรวจสอบ</option>
           </select>
         </div>
       </div>
@@ -4227,6 +4224,7 @@ function suspectCellHtml(r){
 }
 function renderTable(){
   populateYearFilter();
+  populateStationFilter();
   const seqMap = computeSeqMap();
 
   const fState = listFilterState();
@@ -5112,7 +5110,7 @@ function goToFilteredList(fiscalYear, status){
   document.getElementById('filterYear').value = (fiscalYear === 'ทั้งหมด') ? '' : String(fiscalYear);
   document.getElementById('filterStatus').value = status;
   document.getElementById('filterSuspect').value = '';
-  document.getElementById('filterIssues').value = '';
+  document.getElementById('filterStation').value = '';
   document.getElementById('filterHighway').value = '';
   document.getElementById('searchBox').value = '';
   document.getElementById('searchWrap').classList.remove('has-text');
@@ -5188,11 +5186,41 @@ function listFilterState(){
     hw: document.getElementById('filterHighway').value,
     status: document.getElementById('filterStatus').value,
     suspect: document.getElementById('filterSuspect').value,
-    issues: document.getElementById('filterIssues').value
+    station: document.getElementById('filterStation').value
   };
 }
+// สภ.: เทียบชื่อโดยตัดช่องว่าง/จุด และ "สถานีตำรวจภูธร" = "สภ" เพื่อให้พิมพ์ต่างกันเล็กน้อยแล้วยังนับเป็นที่เดียวกัน
+function stationKey(s){
+  return String(s || '').trim().toLowerCase().replace(/^สถานีตำรวจภูธร/, 'สภ').replace(/[\s.]+/g, '');
+}
+function populateStationFilter(){
+  const sel = document.getElementById('filterStation');
+  if (!sel) return;
+  const prev = sel.value;
+  const groups = {};
+  let nNone = 0;
+  records.forEach(r => {
+    const k = stationKey(r.policeStation);
+    if (!k) { nNone++; return; }
+    const g = groups[k] || (groups[k] = { n: 0, names: {} });
+    g.n++;
+    const nm = String(r.policeStation).trim().replace(/\s+/g, ' ');
+    g.names[nm] = (g.names[nm] || 0) + 1;
+  });
+  const items = [['', 'ทั้งหมด']];
+  Object.keys(groups).sort((a, b) => groups[b].n - groups[a].n || naturalCompareTh(a, b)).forEach(k => {
+    const g = groups[k];
+    const nm = Object.keys(g.names).sort((a, b) => g.names[b] - g.names[a])[0];
+    items.push(['st:' + k, nm + ' (' + g.n + ')']);
+  });
+  if (nNone) items.push(['none', 'ยังไม่ระบุ สภ. (' + nNone + ')']);
+  sel.innerHTML = '';
+  items.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
+  sel.value = items.some(i => i[0] === prev) ? prev : '';
+}
 function recordMatchesList(r, f, seqMap){
-  if (f.issues === 'yes' && !recordIssues(r).length) return false;
+  if (f.station === 'none' && stationKey(r.policeStation)) return false;
+  if (f.station && f.station.startsWith('st:') && 'st:' + stationKey(r.policeStation) !== f.station) return false;
   if (f.year && String(r.fiscalYear) !== f.year) return false;
   if (f.hw && String(r.highway) !== f.hw) return false;
   if (f.status === 'open' && isClosedCase(r)) return false;
@@ -5212,7 +5240,7 @@ function recordMatchesList(r, f, seqMap){
 }
 function hasListFilters(){
   const f = listFilterState();
-  return !!(f.q || f.year || f.hw || f.status || f.suspect || f.issues);
+  return !!(f.q || f.year || f.hw || f.status || f.suspect || f.station);
 }
 function getListRecords(scope){
   if (scope === 'all') return records.slice();
@@ -5223,6 +5251,7 @@ function describeListFilters(){
   const f = listFilterState(), out = [];
   if (f.year) out.push('ปีงบประมาณ ' + f.year);
   if (f.hw) out.push('ทล.' + f.hw);
+  if (f.station) out.push('สภ.: ' + (f.station === 'none' ? 'ยังไม่ระบุ' : (document.getElementById('filterStation').selectedOptions[0]?.textContent || '').replace(/\s*\(\d+\)$/, '')));
   if (f.status) out.push('สถานะคดี: ' + (f.status === 'open' ? 'ยังไม่ปิดคดี' : f.status === 'closed' ? 'ปิดคดี' : f.status));
   if (f.suspect) out.push('ผู้ต้องสงสัย: ' + ({ yes: 'พบ', no: 'ไม่พบ', unknown: 'ยังไม่ระบุ' })[f.suspect]);
   if (f.q) out.push('คำค้น "' + document.getElementById('searchBox').value.trim() + '"');
@@ -6576,7 +6605,7 @@ async function init(){
   document.getElementById('filterHighway').addEventListener('change', renderTable);
   document.getElementById('filterStatus').addEventListener('change', renderTable);
   document.getElementById('filterSuspect').addEventListener('change', renderTable);
-  document.getElementById('filterIssues').addEventListener('change', renderTable);
+  document.getElementById('filterStation').addEventListener('change', renderTable);
   setupDataQualityChecks();
   document.getElementById('btnExportXlsx').addEventListener('click', (e) => { e.stopPropagation(); openExportMenu('xlsx'); });
   document.getElementById('btnExportPdf').addEventListener('click', (e) => { e.stopPropagation(); openExportMenu('pdf'); });
