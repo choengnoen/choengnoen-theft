@@ -4179,6 +4179,7 @@ function initDrafts(){
     highways: () => ROUTES.filter(isRouteActive).map(r => ({ value: r.highway, label: r.highway + (r.section ? ' (' + r.section + ')' : '') })),
     parseKm: parseKm,
     openNew: prefillFormFromDraft,
+    openBlank: () => { clearForm(); openFormModal(); },
     openCase: id => { const rec = records.find(r => r.id === id); if (rec) loadRecordIntoForm(rec); else showToast('ไม่พบเคสนี้ (อาจถูกลบ)'); }
   });
   DRAFTS.start();
