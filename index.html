@@ -4180,6 +4180,7 @@ function initDrafts(){
     parseKm: parseKm,
     openNew: prefillFormFromDraft,
     openBlank: () => { clearForm(); openFormModal(); },
+    sectionOf: highwaySection,
     openCase: id => { const rec = records.find(r => r.id === id); if (rec) loadRecordIntoForm(rec); else showToast('ไม่พบเคสนี้ (อาจถูกลบ)'); }
   });
   DRAFTS.start();
