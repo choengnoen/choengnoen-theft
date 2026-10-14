@@ -1456,6 +1456,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <div class="section-title">รายปีงบประมาณ</div>
         <div style="position:relative;height:260px" id="trendChartWrap"><canvas id="trendChart"></canvas></div>
         <p class="hint" id="trendChartEmpty" style="display:none">ไม่มีข้อมูล</p>
+        <div id="trendOlder"></div>
       </div>
     </div>
 
@@ -1720,6 +1721,8 @@ let materialPriceMap = {};
 let assetsCategoryFilter = 'all';
 let barChartInstance = null;
 let trendChartInstance = null;
+let backlogHiddenOpen = false; // คดีที่ต้องติดตาม: ปีเก่ากว่า 10 ปีซ่อนเป็นตาราง
+let trendOlderOpen = false; // กราฟรายปีงบ: แสดง 10 ปีล่าสุด ปีเก่ากว่านั้นซ่อนเป็นตาราง กดปุ่มเพื่อเปิดดู
 
 
 
@@ -1819,12 +1822,36 @@ function renderHighwayBarChart(hwRoutesSorted, byHw){
 }
 
 
-function renderTrendChart(years, totalByYear){
+function renderTrendOlder(olderYears, totalByYear){
+  const box = document.getElementById('trendOlder');
+  if (!box) return;
+  if (!olderYears.length) { box.innerHTML = ''; return; }
+  const list = olderYears.slice().sort((a,b) => b - a); // ใหม่→เก่า
+  const maxCount = Math.max(...list.map(y => totalByYear[y] || 0), 1);
+  box.innerHTML = `
+    <div style="text-align:center;margin-top:8px"><a class="link-btn" id="trendOlderLink">${trendOlderOpen ? '▲ ซ่อนปีก่อนหน้า' : '▼ ดูปีก่อนหน้า ' + list.length + ' ปี'}</a></div>
+    ${trendOlderOpen ? `
+      <table class="spot-table">
+        <thead><tr><th>ปีงบประมาณ</th><th style="width:45%"></th><th style="text-align:right">คดี</th></tr></thead>
+        <tbody>${list.map(y => `
+          <tr><td>ปีงบ ${escapeHtml(String(y))}</td>
+          <td><div class="mini-track"><i style="width:${Math.round((totalByYear[y] || 0) / maxCount * 100)}%;background:linear-gradient(90deg,#5cbfb1,#1f7a70)"></i></div></td>
+          <td class="mono" style="text-align:right"><b>${totalByYear[y] || 0}</b></td></tr>`).join('')}
+        </tbody>
+      </table>` : ''}`;
+  const link = document.getElementById('trendOlderLink');
+  if (link) link.onclick = () => { trendOlderOpen = !trendOlderOpen; renderTrendOlder(olderYears, totalByYear); };
+}
+
+function renderTrendChart(allYears, totalByYear){
   const canvas = document.getElementById('trendChart');
   const wrap = document.getElementById('trendChartWrap');
   const emptyHint = document.getElementById('trendChartEmpty');
   if (!canvas || !window.Chart) return;
   if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
+  // กราฟแสดง 10 ปีงบล่าสุด (ปีล่าสุดอยู่บนสุด) ปีที่เก่ากว่านั้นไปอยู่ในตารางที่กดดูได้
+  const years = allYears.slice(-10).reverse();
+  renderTrendOlder(allYears.slice(0, Math.max(0, allYears.length - 10)), totalByYear);
   if (!years.length) {
     canvas.style.display = 'none';
     if (emptyHint) emptyHint.style.display = '';
@@ -5133,11 +5160,19 @@ function renderFollowUp(){
   } else if (older.length) {
     const byFy = {};
     older.forEach(({ r }) => { const y = r.fiscalYear || '-'; byFy[y] = (byFy[y] || 0) + 1; });
-    const years = Object.keys(byFy).sort();
+    const years = Object.keys(byFy).sort().reverse(); // ปีล่าสุดอยู่บนสุด
     const maxN = Math.max(...years.map(y => byFy[y]));
+    // แสดง 10 ปีงบล่าสุด ปีที่เก่ากว่านั้นซ่อนเป็นตาราง กดปุ่มเพื่อเปิดดู
+    const shownYears = years.slice(0, 10);
+    const hiddenYears = years.slice(10);
     backlogHtml = `
       <div class="backlog-head"><span>คดีค้างเก่า แยกตามปีงบประมาณ</span><a class="link-btn" id="followOlderLink">ดูทั้งหมด →</a></div>
-      ${years.map(y => `<div class="backlog-row" data-fy="${escapeHtml(String(y))}"><span>${escapeHtml(String(y))}</span><div class="mini-track"><i style="width:${Math.round(byFy[y] / maxN * 100)}%"></i></div><b class="mono" style="text-align:right">${byFy[y]}</b></div>`).join('')}`;
+      ${shownYears.map(y => `<div class="backlog-row" data-fy="${escapeHtml(String(y))}"><span>${escapeHtml(String(y))}</span><div class="mini-track"><i style="width:${Math.round(byFy[y] / maxN * 100)}%"></i></div><b class="mono" style="text-align:right">${byFy[y]}</b></div>`).join('')}
+      ${hiddenYears.length ? `<div style="text-align:center;margin-top:8px"><a class="link-btn" id="backlogHiddenLink">${backlogHiddenOpen ? '▲ ซ่อนปีก่อนหน้า' : '▼ ดูปีก่อนหน้า ' + hiddenYears.length + ' ปี'}</a></div>
+      ${backlogHiddenOpen ? `<table class="spot-table">
+        <thead><tr><th>ปีงบประมาณ</th><th style="width:45%"></th><th style="text-align:right">คดี</th></tr></thead>
+        <tbody>${hiddenYears.map(y => `<tr style="cursor:pointer" data-fy="${escapeHtml(String(y))}"><td>${escapeHtml(String(y))}</td><td><div class="mini-track"><i style="width:${Math.round(byFy[y] / maxN * 100)}%"></i></div></td><td class="mono" style="text-align:right"><b>${byFy[y]}</b></td></tr>`).join('')}</tbody>
+      </table>` : ''}` : ''}`;
   }
 
   el.innerHTML = statsHtml + backlogHtml;   // ไม่แสดงรายการคดีค้าง
@@ -5149,6 +5184,9 @@ function renderFollowUp(){
   el.querySelectorAll('.backlog-row').forEach(row => {
     row.onclick = () => row.dataset.hw !== undefined ? goList(dashYear, row.dataset.hw) : goList(row.dataset.fy);
   });
+  el.querySelectorAll('tr[data-fy]').forEach(tr => { tr.onclick = () => goList(tr.dataset.fy); });
+  const hiddenLink = document.getElementById('backlogHiddenLink');
+  if (hiddenLink) hiddenLink.onclick = () => { backlogHiddenOpen = !backlogHiddenOpen; renderFollowUp(); };
   const more = document.getElementById('followMoreLink');
   if (more) more.onclick = () => goList(fyMode ? dashYear : 'ทั้งหมด');
   const olderLink = document.getElementById('followOlderLink');
