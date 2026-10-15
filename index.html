@@ -1163,6 +1163,9 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-prog{padding:8px 12px;margin-bottom:0;gap:10px}
 .snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
+.snap .cd-dl.snap-dl{display:grid;grid-template-columns:132px 1fr;gap:5px 10px;font-size:13.5px;line-height:1.5}
+.snap .cd-dl.snap-dl dt{white-space:normal}
+.snap .cd-dl.snap-dl dd{font-size:13.5px !important}
 .snap .cd-divider{margin:8px 0}
 .snap .cd-photos{gap:8px}
 .snap .cd-photo{aspect-ratio:4/3}
@@ -2069,6 +2072,14 @@ function formatThaiDate(dateStr){
   const month = THAI_MONTHS_SHORT[d.getMonth()];
   const yearBE = String(d.getFullYear() + 543).slice(-2);
   return `${day} ${month} ${yearBE}`;
+}
+// วันที่แบบเต็มไม่ย่อ (ใช้ในหน้าต่างรายละเอียดและรูปคัดลอก) เช่น 11 สิงหาคม 2569
+const THAI_MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function formatThaiDateFull(dateStr){
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return escapeHtml(dateStr);
+  return `${d.getDate()} ${THAI_MONTHS_FULL[d.getMonth()]} ${d.getFullYear() + 543}`;
 }
 function escapeHtml(s){
   if (s === null || s === undefined) return '';
@@ -4851,10 +4862,14 @@ async function buildCaseImage(){
   const rightCards = colEls[1] ? [...colEls[1].children] : [];
   const isPhoto = c => { const s = c.querySelector && c.querySelector('.cd-sec'); return !!(s && /รูปถ่าย/.test(s.textContent)); };
   const photoCard = [...leftCards, ...rightCards].find(isPhoto) || null;
-  const L = leftCards.filter(c => c !== photoCard), R = rightCards.filter(c => c !== photoCard);
-  // ย่อการ์ดข้อมูล: หัวข้อ–ค่า 2 ชุดต่อบรรทัด · รายการทรัพย์สินแบ่ง 2 คอลัมน์
+  // แถว "ผู้ต้องสงสัย" ซ้ำกับเส้นความคืบหน้าด้านบน → ตัดออกจากรูป
+  clone.querySelectorAll('.cd-dl dt').forEach(dt => { if (dt.textContent.trim() === 'ผู้ต้องสงสัย') { const dd = dt.nextElementSibling; dt.remove(); if (dd && dd.tagName === 'DD') dd.remove(); } });
+  // การ์ดข้อมูลที่ไม่เหลือแถวใดเลย (เช่น หมายเหตุที่ว่าง) ไม่ต้องแสดงเป็นกรอบเปล่า
+  const hasRows = c => { const dl = c.querySelector('.cd-dl'); return !dl || dl.children.length > 0; };
+  const L = leftCards.filter(c => c !== photoCard && hasRows(c)), R = rightCards.filter(c => c !== photoCard && hasRows(c));
+  // จัดการ์ดข้อมูล: หัวข้อ–ค่า แถวละ 1 รายการ เรียงตามลำดับเนื้อหา (ไม่จับคู่ข้ามหัวข้อ) · รายการทรัพย์สินแบ่ง 2 คอลัมน์
   [...L, ...R].forEach(card => {
-    card.querySelectorAll('.cd-dl').forEach(dl => dl.replaceWith(snapPairify([dl])));
+    card.querySelectorAll('.cd-dl').forEach(dl => dl.classList.add('snap-dl'));
     const items = [...card.querySelectorAll(':scope > .cd-item')];
     if (items.length >= 4) {   // รายการน้อย (1–3 รายการ) แสดงคอลัมน์เดียวตามเดิม
       const receipt = card.querySelector(':scope > .cd-receipt');
@@ -4864,8 +4879,9 @@ async function buildCaseImage(){
       if (receipt) card.insertBefore(list, receipt); else card.appendChild(list);
     }
   });
-  const grid = mk('snap-grid', [mk('snap-col', [photoCard, ...L]), mk('snap-col', R)]);
-  grid.style.gridTemplateColumns = '1fr 1.25fr';
+  // ซ้าย = ข้อมูลเรื่อง (เหตุ → มอบหมาย → แจ้งความ → หมายเหตุ) · ขวา = รูปถ่าย + รายการทรัพย์สิน/มูลค่า
+  const grid = mk('snap-grid', [mk('snap-col', [...L, ...R.filter(c => !c.querySelector(':scope > .cd-item,:scope > .cd-receipt,.snap-items2'))]), mk('snap-col', [photoCard, ...R.filter(c => c.querySelector(':scope > .cd-item,:scope > .cd-receipt,.snap-items2'))])]);
+  grid.style.gridTemplateColumns = '1fr 1fr';
 
   const shell = document.createElement('div');
   shell.className = 'modal case-modal snap';
@@ -4874,7 +4890,7 @@ async function buildCaseImage(){
   body.appendChild(mk('snap-col', [...top, grid]));
   const stamp = document.createElement('div');
   stamp.className = 'snap-stamp';
-  stamp.textContent = SNAP_SYSTEM_NAME + ' · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDate(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
+  stamp.textContent = SNAP_SYSTEM_NAME + ' · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDateFull(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' เวลา ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
   shell.append(hd, body, stamp);
 
   const stage = document.createElement('div');
@@ -4997,13 +5013,13 @@ function openCaseDetailModal(id){
   const wd = window.DRAFTS && DRAFTS.addWorkdays && DRAFTS.workLeft ? DRAFTS : null;
   let docCls = 'n', docSub = repStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันแจ้งความ', docNote = '';
   if (sentStr) {
-    docCls = 'ok'; docSub = escapeHtml(formatThaiDate(sentStr));
+    docCls = 'ok'; docSub = escapeHtml(formatThaiDateFull(sentStr));
     if (wd && repStr) { const late = -wd.workLeft(sentStr, wd.addWorkdays(repStr, 10)); if (late > 0) docNote = 'ส่งช้า ' + late + ' วันทำการ'; }
   } else if (isClosed) {
     docSub = 'ไม่ได้บันทึกวันส่ง';
   } else if (wd && repStr) {
     const due = wd.addWorkdays(repStr, 10), left = wd.workLeft(todayStr, due);
-    docNote = 'กำหนด ' + escapeHtml(formatThaiDate(due));
+    docNote = 'กำหนด ' + escapeHtml(formatThaiDateFull(due));
     if (left < 0) { docCls = 'bad'; docSub = 'เลยกำหนด <span class="cd-nw">' + (-left) + ' วันทำการ</span>'; }
     else if (left === 0) { docCls = 'bad'; docSub = due < todayStr ? 'เลยกำหนดแล้ว' : 'ครบกำหนดวันนี้'; }
     else { docCls = 'warn'; docSub = 'เหลือ <span class="cd-nw">' + left + ' วันทำการ</span>'; }
@@ -5013,12 +5029,12 @@ function openCaseDetailModal(id){
     : step('n', 'ผู้ต้องสงสัย', 'ยังไม่ระบุ');
   const tilesHtml = `${issuesBoxHtml(rec)}<div class="cd-prog">
       <ol class="cd-steps">
-        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDate(incStr)) : 'ยังไม่ระบุ')}
-        ${step(repStr ? 'ok' : 'n', 'แจ้งความ', repStr ? escapeHtml(formatThaiDate(repStr)) : 'ยังไม่ระบุ')}
+        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDateFull(incStr)) : 'ยังไม่ระบุ')}
+        ${step(repStr ? 'ok' : 'n', 'แจ้งความ', repStr ? escapeHtml(formatThaiDateFull(repStr)) : 'ยังไม่ระบุ')}
         ${step(docCls, 'ส่งเอกสารถึงแขวง', docSub, docNote)}
         ${step(isClosed ? 'ok' : (rec.status ? 'warn' : 'n'), 'สถานะคดี', escapeHtml(rec.status || 'ยังไม่ระบุ'))}
         ${suspectStep}
-        ${step(isClosed ? 'ok' : 'warn', 'ปิดคดี', isClosed ? (rec.closedDate ? escapeHtml(formatThaiDate(rec.closedDate)) : 'ปิดแล้ว') : 'ยังไม่ปิดคดี')}
+        ${step(isClosed ? 'ok' : 'warn', 'ปิดคดี', isClosed ? (rec.closedDate ? escapeHtml(formatThaiDateFull(rec.closedDate)) : 'ปิดแล้ว') : 'ยังไม่ปิดคดี')}
       </ol>
       <div class="cd-age"><span>${isClosed ? 'ใช้เวลาจนปิดคดี' : 'ระยะเวลาค้าง'}</span><b>${days === null ? '-' : days.toLocaleString('th-TH') + ' วัน'}</b></div>
     </div>`;
@@ -5058,14 +5074,14 @@ function openCaseDetailModal(id){
             <div>
               <div class="cd-card"><div class="cd-sec">ข้อมูลเหตุโจรกรรม</div>
                 <dl class="cd-dl">
-                  <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
+                  <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDateFull(rec.dateIncident) + (rec.time ? ' เวลา ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(areaText)}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">การมอบหมายแจ้งความ</div>
                 <dl class="cd-dl">
                   <dt>มอบโดย</dt><dd>${cdVal(rec.assignedBy)}</dd>
                   <dt>หนังสือเลขที่</dt><dd style="font-size:13px">${cdVal(rec.assignLetterNo)}</dd>
-                  <dt>ลงวันที่</dt><dd>${cdVal(formatThaiDate(rec.assignDate))}</dd>
+                  <dt>ลงวันที่</dt><dd>${cdVal(formatThaiDateFull(rec.assignDate))}</dd>
                   <dt>มอบให้</dt><dd>${cdVal(rec.assignedToName)}</dd>
                   <dt>ตำแหน่ง</dt><dd>${cdVal(rec.assignedToPosition)}</dd>
                   <dt>โทร</dt><dd>${cdVal(rec.assignedToPhone)}</dd>
@@ -5073,7 +5089,7 @@ function openCaseDetailModal(id){
               <div class="cd-card"><div class="cd-sec">การแจ้งความ</div>
                 <dl class="cd-dl">
                   <dt>เลขคดี / เลขรับแจ้งความ</dt><dd style="font-size:13px">${cdVal(policeCaseNo(rec))}</dd>
-                  <dt>แจ้งความเมื่อ</dt><dd>${cdVal(formatThaiDate(rec.reportedDate))}</dd>
+                  <dt>แจ้งความเมื่อ</dt><dd>${cdVal(formatThaiDateFull(rec.reportedDate))}</dd>
                   <dt>ตำรวจผู้ลงบันทึก</dt><dd>${cdVal(rec.policeOfficer)}</dd>
                   <dt>โทร</dt><dd>${cdVal(rec.policePhone)}</dd>
                   <dt>ผู้ต้องสงสัย</dt><dd>${escapeHtml(rec.suspectStatus) || 'ไม่ระบุ'}${rec.suspectStatus === 'พบ' && rec.suspectName ? ' — ' + escapeHtml(rec.suspectName) : ''}</dd>
@@ -5085,7 +5101,7 @@ function openCaseDetailModal(id){
                 </dl></div>
               ${(rec.interrogations && rec.interrogations.length) ? `<div class="cd-card"><div class="cd-sec">บันทึกการเรียกสอบปากคำ</div>
                 <dl class="cd-dl">
-                  ${rec.interrogations.map((it, i) => `<dt>ครั้งที่ ${i + 1}</dt><dd>${escapeHtml(formatThaiDate(it.date)) || '-'}${it.note ? ' — ' + escapeHtml(it.note) : ''}</dd>`).join('')}
+                  ${rec.interrogations.map((it, i) => `<dt>ครั้งที่ ${i + 1}</dt><dd>${escapeHtml(formatThaiDateFull(it.date)) || '-'}${it.note ? ' — ' + escapeHtml(it.note) : ''}</dd>`).join('')}
                 </dl></div>` : ''}
             </div>
             <div>
