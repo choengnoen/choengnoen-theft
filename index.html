@@ -1164,7 +1164,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
 .snap .cd-card{flex-shrink:0;overflow:visible}
-.snap .snap-itemscard{margin-top:10px}
+.snap .snap-grid{align-items:start}
 .snap .snap-itemscard .snap-items2{column-gap:32px}
 .snap .snap-sz{display:block;font-weight:600}
 .snap .snap-itemscard .cd-item{align-items:center;padding:6px 0;line-height:1.6}
@@ -4869,20 +4869,22 @@ async function buildCaseImage(){
   const leftCards = colEls[0] ? [...colEls[0].children] : [];
   const rightCards = colEls[1] ? [...colEls[1].children] : [];
   const isPhoto = c => { const s = c.querySelector && c.querySelector('.cd-sec'); return !!(s && /รูปถ่าย/.test(s.textContent)); };
-  const photoCard = [...leftCards, ...rightCards].find(isPhoto) || null;
+  const photoCardAny = [...leftCards, ...rightCards].find(isPhoto) || null;
+  // ไม่มีรูปถ่ายในเคสนี้ → ไม่แสดงหัวข้อ "รูปถ่าย" ในรูปที่คัดลอก
+  const photoCard = photoCardAny && photoCardAny.querySelector('.cd-photo') ? photoCardAny : null;
   // แถว "ผู้ต้องสงสัย" ซ้ำกับเส้นความคืบหน้าด้านบน → ตัดออกจากรูป
   clone.querySelectorAll('.cd-dl dt').forEach(dt => { if (dt.textContent.trim() === 'ผู้ต้องสงสัย') { const dd = dt.nextElementSibling; dt.remove(); if (dd && dd.tagName === 'DD') dd.remove(); } });
   // การ์ดข้อมูลที่ไม่เหลือแถวใดเลย (เช่น หมายเหตุที่ว่าง) ไม่ต้องแสดงเป็นกรอบเปล่า
   const hasRows = c => { const dl = c.querySelector('.cd-dl'); return !dl || dl.children.length > 0; };
-  const L = leftCards.filter(c => c !== photoCard && hasRows(c)), R = rightCards.filter(c => c !== photoCard && hasRows(c));
+  const L = leftCards.filter(c => c !== photoCardAny && hasRows(c)), R = rightCards.filter(c => c !== photoCardAny && hasRows(c));
   // จัดการ์ดข้อมูล: หัวข้อ–ค่า แถวละ 1 รายการ เรียงตามลำดับเนื้อหา (ไม่จับคู่ข้ามหัวข้อ)
   const isItemsCard = c => !!c.querySelector(':scope > .cd-receipt');
   const itemsCard = [...L, ...R].find(isItemsCard) || null;
   const infoCards = [...L, ...R].filter(c => c !== itemsCard);
   infoCards.forEach(card => card.querySelectorAll('.cd-dl').forEach(dl => dl.classList.add('snap-dl')));
-  // บน: ซ้าย = ข้อมูลเรื่อง · ขวา = ข้อมูลที่เหลือ + รูปถ่าย | ล่าง: รายการทรัพย์สินเต็มความกว้าง (ชื่อวัสดุอยู่บรรทัดเดียว ไม่ตัดบรรทัด) + มูลค่ารวม
-  const nLeft = Math.ceil(infoCards.length / 2);
-  const grid = mk('snap-grid', [mk('snap-col', infoCards.slice(0, nLeft)), mk('snap-col', [...infoCards.slice(nLeft), photoCard])]);
+  // ซ้าย = ข้อมูลเรื่อง ต่อกันเป็นลำดับ (ข้อมูลเหตุ → การมอบหมายแจ้งความ → การแจ้งความ → หมายเหตุ)
+  // ขวา = รูปถ่าย แล้วต่อด้วยรายการทรัพย์สิน + มูลค่ารวม
+  const grid = mk('snap-grid', [mk('snap-col', infoCards), mk('snap-col', [photoCard, itemsCard])]);
   grid.style.gridTemplateColumns = '1fr 1fr';
   if (itemsCard) {
     itemsCard.classList.add('snap-itemscard');
@@ -4897,20 +4899,13 @@ async function buildCaseImage(){
       b.textContent = txt.slice(0, m.index);
       b.appendChild(sz);
     });
-    // รายการ ≥ 4 → แบ่ง 2 คอลัมน์ เรียงสลับซ้าย-ขวาเป็นแถว (น้อยกว่านั้นคอลัมน์เดียว)
-    const its = [...itemsCard.querySelectorAll(':scope > .cd-item')];
-    if (its.length >= 4) {
-      const half = Math.ceil(its.length / 2), cells = [];
-      for (let i = 0; i < half; i++) cells.push(its[i], its[half + i] || mk('', []));
-      itemsCard.insertBefore(mk('snap-items2', cells), itemsCard.querySelector(':scope > .cd-receipt'));
-    }
   }
 
   const shell = document.createElement('div');
   shell.className = 'modal case-modal snap';
   const body = document.createElement('div');
   body.className = 'modal-body';
-  body.appendChild(mk('snap-col', [...top, grid, itemsCard]));
+  body.appendChild(mk('snap-col', [...top, grid]));
   const stamp = document.createElement('div');
   stamp.className = 'snap-stamp';
   stamp.textContent = SNAP_SYSTEM_NAME + ' · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDateFull(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' เวลา ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
