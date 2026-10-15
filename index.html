@@ -1163,6 +1163,11 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-prog{padding:8px 12px;margin-bottom:0;gap:10px}
 .snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
+.snap .snap-itemscard{margin-top:10px}
+.snap .snap-itemscard .cd-item{align-items:center;padding:6px 0;line-height:1.6}
+.snap .snap-itemscard .cd-item > div{flex:1;min-width:0}
+.snap .snap-itemscard .cd-item b{font-size:14px;line-height:1.6}
+.snap .snap-itemscard .cd-q{font-size:12px;line-height:1.5}
 .snap .cd-dl.snap-dl{display:grid;grid-template-columns:132px 1fr;gap:5px 10px;font-size:13.5px;line-height:1.5}
 .snap .cd-dl.snap-dl dt{white-space:normal}
 .snap .cd-dl.snap-dl dd{font-size:13.5px !important}
@@ -1382,7 +1387,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 
       <div class="grid grid-4">
         <div class="field">
-          <label>เลขคดี / เลขรับแจ้งความ</label>
+          <label>เลขรับแจ้งความ</label>
           <input type="text" id="f_reportLetterNo" placeholder="เช่น CC70129256914294B">
         </div>
         <div class="field">
@@ -1479,7 +1484,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
       <div class="table-toolbar">
         <div class="assets-search-wrap" id="searchWrap" style="min-width:220px;flex:1">
           <span class="assets-search-icon">🔍</span>
-          <input type="text" id="searchBox" name="list-filter" autocomplete="off" placeholder="ค้นหา..." title="ค้นหาได้จาก: ที่, วันที่, กม., เลขคดี, สภ., ชื่อผู้ต้องสงสัย">
+          <input type="text" id="searchBox" name="list-filter" autocomplete="off" placeholder="ค้นหา..." title="ค้นหาได้จาก: ที่, วันที่, กม., เลขรับแจ้งความ, สภ., ชื่อผู้ต้องสงสัย">
           <button type="button" class="assets-search-clear" id="searchClear" title="ล้างคำค้นหา">✕</button>
         </div>
         <div class="filter-wrap" id="filterWrap"><button type="button" class="btn btn-outline" id="btnFilterToggle" aria-expanded="false" aria-controls="filterPop"><svg class="filter-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg> ตัวกรอง <span class="filter-badge" id="filterBadge">0</span></button><div class="filter-pop" id="filterPop" hidden>
@@ -1523,7 +1528,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <thead>
             <tr>
               <th style="width:12%">วันที่</th><th style="width:20%">สายทาง / กม.</th><th style="width:19%">สภ. / บริเวณ</th>
-              <th style="width:15%">เลขคดี</th><th style="width:10%">มูลค่าเสียหาย</th><th style="width:10%">ผู้ต้องสงสัย</th><th class="repair-th" style="width:14%">สถานะคดี</th>
+              <th style="width:15%">เลขรับแจ้งความ</th><th style="width:10%">มูลค่าเสียหาย</th><th style="width:10%">ผู้ต้องสงสัย</th><th class="repair-th" style="width:14%">สถานะคดี</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -3581,7 +3586,7 @@ function updateSuspectNameVisibility(){
   document.getElementById('f_suspectNameWrap').style.display = found ? '' : 'none';
   if (!found) document.getElementById('f_suspectName').value = '';
 }
-// ยุบรวม "เลขคดีตำรวจ" กับ "เลขหนังสือแจ้งความ" เหลือช่องเดียว (เจ้าหน้าที่กรอกเลขคดี CC/EV ลงช่องเลขหนังสือแจ้งความมาตลอด)
+// ยุบรวม "เลขรับแจ้งความตำรวจ" กับ "เลขหนังสือแจ้งความ" เหลือช่องเดียว (เจ้าหน้าที่กรอกเลขรับแจ้งความ CC/EV ลงช่องเลขหนังสือแจ้งความมาตลอด)
 // เก็บที่ reportLetterNo — เคสเก่าที่มีแค่ caseNo ยังแสดงได้
 function policeCaseNo(r){ return (r && (r.reportLetterNo || r.caseNo)) || ''; }
 // บันทึกการสอบปากคำ: แสดงเฉพาะเมื่อจับกุมผู้ต้องหาได้/ปิดคดีแล้ว หรือเคสมีบันทึกอยู่แล้ว
@@ -3592,8 +3597,8 @@ function updateInterrogationVisibility(){
 }
 /* ============ ตรวจความถูกต้องของข้อมูล ============
    - วันที่ผิด (ก่อนวันเกิดเหตุ / อยู่ในอนาคต) → ห้ามบันทึก
-   - เลขคดีซ้ำกับเคสอื่น → เตือนใต้ช่อง + ถามยืนยันตอนบันทึก (คดีเดียวกันจริงได้ เช่น แจ้งหลายจุดในเลขเดียว)
-   - เลขคดีแบบ CC/EV ผิดรูปแบบ, หนังสือมอบหมายยังไม่มีเลข/วันที่ → เตือนอย่างเดียว
+   - เลขรับแจ้งความซ้ำกับเคสอื่น → เตือนใต้ช่อง + ถามยืนยันตอนบันทึก (คดีเดียวกันจริงได้ เช่น แจ้งหลายจุดในเลขเดียว)
+   - เลขรับแจ้งความแบบ CC/EV ผิดรูปแบบ, หนังสือมอบหมายยังไม่มีเลข/วันที่ → เตือนอย่างเดียว
    - เคสเก่าที่ผิดเงื่อนไข → ป้าย ⚠️ ในตาราง + ตัวกรอง "ต้องตรวจสอบ" */
 const CHECK_DATE_FIELDS = [
   ['f_reportedDate', 'วันแจ้งความ', 'reportedDate'],
@@ -3625,11 +3630,11 @@ function dateIssues(r){
   return out;
 }
 function normCaseNo(s){ return String(s || '').toUpperCase().replace(/[\s\-_.]/g, ''); }
-// เลขคดีจากระบบตำรวจ: อักษร 2 + ตัวเลข 14 + อักษร 1 (เช่น CC70129256914294B) — ตรวจเฉพาะเลขที่ขึ้นต้นด้วยอักษร 2 ตัว
+// เลขรับแจ้งความจากระบบตำรวจ: อักษร 2 + ตัวเลข 14 + อักษร 1 (เช่น CC70129256914294B) — ตรวจเฉพาะเลขที่ขึ้นต้นด้วยอักษร 2 ตัว
 function caseNoFormatIssue(no){
   const n = normCaseNo(no);
   if (!/^[A-Z]{2}\d/.test(n) || /^[A-Z]{2}\d{14}[A-Z]$/.test(n)) return '';
-  return 'เลขคดีควรมี 17 ตัว (อักษร 2 + ตัวเลข 14 + อักษร 1) แต่มี ' + n.length + ' ตัว — ตรวจสอบกับใบแจ้งความ';
+  return 'เลขรับแจ้งความควรมี 17 ตัว (อักษร 2 + ตัวเลข 14 + อักษร 1) แต่มี ' + n.length + ' ตัว — ตรวจสอบกับใบแจ้งความ';
 }
 function findDupCases(no, selfId){
   const n = normCaseNo(no);
@@ -3653,7 +3658,7 @@ function recordIssues(r){
   const out = dateIssues(r).map(i => i.msg);
   const no = policeCaseNo(r);
   const dups = findDupCases(no, r.id);
-  if (dups.length && !isDupConfirmed(r, dups)) out.push('เลขคดีซ้ำกับเคส ' + dups.map(d => caseLabelOf(d)).join(', '));
+  if (dups.length && !isDupConfirmed(r, dups)) out.push('เลขรับแจ้งความซ้ำกับเคส ' + dups.map(d => caseLabelOf(d)).join(', '));
   const fmt = caseNoFormatIssue(no);
   if (fmt) out.push(fmt);
   if (assignLetterIncomplete(r)) out.push('หนังสือมอบหมายยังไม่มีเลขที่หรือวันที่');
@@ -3669,7 +3674,7 @@ function issuesBoxHtml(r){
   return '<div class="dq-box"><b>⚠️ ข้อมูลที่ต้องตรวจสอบ</b><ul>' + list.map(m => '<li>' + escapeHtml(m) + '</li>').join('') + '</ul></div>';
 }
 
-/* ----- ในฟอร์ม: ข้อความใต้ช่องวันที่ + เลขคดี ----- */
+/* ----- ในฟอร์ม: ข้อความใต้ช่องวันที่ + เลขรับแจ้งความ ----- */
 function fieldHintEl(id){
   let el = document.getElementById('dq_' + id);
   if (!el) {
@@ -3732,19 +3737,19 @@ function setupDataQualityChecks(){
     openCaseDetailModal(a.dataset.id);
   });
 }
-// ถามยืนยันเมื่อเลขคดีซ้ำ → resolve(true) = บันทึกต่อ, false = กลับไปแก้
+// ถามยืนยันเมื่อเลขรับแจ้งความซ้ำ → resolve(true) = บันทึกต่อ, false = กลับไปแก้
 function confirmDupCaseNo(dups){
   return new Promise(resolve => {
     const root = document.getElementById('modalRoot');
     root.innerHTML = `
       <div class="modal-backdrop">
         <div class="modal">
-          <div class="modal-head"><h3>⚠️ เลขคดีซ้ำกับเคสอื่น</h3><button class="modal-close" id="dupClose" type="button">×</button></div>
-          <p>เลขคดีนี้ถูกใช้แล้วในเคส:</p>
+          <div class="modal-head"><h3>⚠️ เลขรับแจ้งความซ้ำกับเคสอื่น</h3><button class="modal-close" id="dupClose" type="button">×</button></div>
+          <p>เลขรับแจ้งความนี้ถูกใช้แล้วในเคส:</p>
           <ul>${dups.map(d => '<li>' + escapeHtml(caseBrief(d)) + '</li>').join('')}</ul>
-          <p class="hint">ถ้าพิมพ์หรือคัดลอกเลขผิด ให้กด "แก้เลขคดี" — ถ้าตำรวจรับแจ้งหลายจุดในเลขคดีเดียวกันจริง ให้กด "บันทึกต่อ"</p>
+          <p class="hint">ถ้าพิมพ์หรือคัดลอกเลขผิด ให้กด "แก้เลขรับแจ้งความ" — ถ้าตำรวจรับแจ้งหลายจุดในเลขรับแจ้งความเดียวกันจริง ให้กด "บันทึกต่อ"</p>
           <div class="actions">
-            <button class="btn btn-outline" id="dupFix">แก้เลขคดี</button>
+            <button class="btn btn-outline" id="dupFix">แก้เลขรับแจ้งความ</button>
             <button class="btn btn-primary" id="dupOk">บันทึกต่อ — เป็นคดีเดียวกันจริง</button>
           </div>
         </div>
@@ -4209,7 +4214,7 @@ async function saveForm(){
     showToast('บันทึกไม่ได้: ' + badDates[0].msg);
     return;
   }
-  // เลขคดีซ้ำ → ถามยืนยัน (ยืนยันแล้วจำไว้ ไม่ถามซ้ำ)
+  // เลขรับแจ้งความซ้ำ → ถามยืนยัน (ยืนยันแล้วจำไว้ ไม่ถามซ้ำ)
   const caseNoVal = document.getElementById('f_reportLetterNo').value.trim();
   const dupCases = findDupCases(caseNoVal, editingId);
   const selfRec = editingId ? records.find(r => r.id === editingId) : null;
@@ -4655,7 +4660,7 @@ async function openTrashModal(){
   listEl.innerHTML = items.map(r => `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)">
       <div>
-        <div><b>ทล.${escapeHtml(r.highway || '-')}</b> กม.${escapeHtml(formatKm(r.km) || '-')} — ${escapeHtml(policeCaseNo(r) || 'ไม่ระบุเลขคดี')}</div>
+        <div><b>ทล.${escapeHtml(r.highway || '-')}</b> กม.${escapeHtml(formatKm(r.km) || '-')} — ${escapeHtml(policeCaseNo(r) || 'ไม่ระบุเลขรับแจ้งความ')}</div>
         <div class="hint">ลบโดย ${escapeHtml(r.deletedBy || '-')} เมื่อ ${escapeHtml(normalizeDateStr(r.deletedAt) || String(r.deletedAt || '-'))}</div>
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
@@ -4867,27 +4872,22 @@ async function buildCaseImage(){
   // การ์ดข้อมูลที่ไม่เหลือแถวใดเลย (เช่น หมายเหตุที่ว่าง) ไม่ต้องแสดงเป็นกรอบเปล่า
   const hasRows = c => { const dl = c.querySelector('.cd-dl'); return !dl || dl.children.length > 0; };
   const L = leftCards.filter(c => c !== photoCard && hasRows(c)), R = rightCards.filter(c => c !== photoCard && hasRows(c));
-  // จัดการ์ดข้อมูล: หัวข้อ–ค่า แถวละ 1 รายการ เรียงตามลำดับเนื้อหา (ไม่จับคู่ข้ามหัวข้อ) · รายการทรัพย์สินแบ่ง 2 คอลัมน์
-  [...L, ...R].forEach(card => {
-    card.querySelectorAll('.cd-dl').forEach(dl => dl.classList.add('snap-dl'));
-    const items = [...card.querySelectorAll(':scope > .cd-item')];
-    if (items.length >= 4) {   // รายการน้อย (1–3 รายการ) แสดงคอลัมน์เดียวตามเดิม
-      const receipt = card.querySelector(':scope > .cd-receipt');
-      const half = Math.ceil(items.length / 2);
-      const cells = []; for (let i = 0; i < half; i++) cells.push(items[i], items[half + i] || mk('', []));   // เรียงสลับซ้าย-ขวาเป็นแถว ให้บรรทัดสองคอลัมน์ตรงกัน
-    const list = mk('snap-items2', cells);
-      if (receipt) card.insertBefore(list, receipt); else card.appendChild(list);
-    }
-  });
-  // ซ้าย = ข้อมูลเรื่อง (เหตุ → มอบหมาย → แจ้งความ → หมายเหตุ) · ขวา = รูปถ่าย + รายการทรัพย์สิน/มูลค่า
-  const grid = mk('snap-grid', [mk('snap-col', [...L, ...R.filter(c => !c.querySelector(':scope > .cd-item,:scope > .cd-receipt,.snap-items2'))]), mk('snap-col', [photoCard, ...R.filter(c => c.querySelector(':scope > .cd-item,:scope > .cd-receipt,.snap-items2'))])]);
+  // จัดการ์ดข้อมูล: หัวข้อ–ค่า แถวละ 1 รายการ เรียงตามลำดับเนื้อหา (ไม่จับคู่ข้ามหัวข้อ)
+  const isItemsCard = c => !!c.querySelector(':scope > .cd-receipt');
+  const itemsCard = [...L, ...R].find(isItemsCard) || null;
+  const infoCards = [...L, ...R].filter(c => c !== itemsCard);
+  infoCards.forEach(card => card.querySelectorAll('.cd-dl').forEach(dl => dl.classList.add('snap-dl')));
+  // บน: ซ้าย = ข้อมูลเรื่อง · ขวา = ข้อมูลที่เหลือ + รูปถ่าย | ล่าง: รายการทรัพย์สินเต็มความกว้าง (ชื่อวัสดุอยู่บรรทัดเดียว ไม่ตัดบรรทัด) + มูลค่ารวม
+  const nLeft = Math.ceil(infoCards.length / 2);
+  const grid = mk('snap-grid', [mk('snap-col', infoCards.slice(0, nLeft)), mk('snap-col', [...infoCards.slice(nLeft), photoCard])]);
   grid.style.gridTemplateColumns = '1fr 1fr';
+  if (itemsCard) itemsCard.classList.add('snap-itemscard');
 
   const shell = document.createElement('div');
   shell.className = 'modal case-modal snap';
   const body = document.createElement('div');
   body.className = 'modal-body';
-  body.appendChild(mk('snap-col', [...top, grid]));
+  body.appendChild(mk('snap-col', [...top, grid, itemsCard]));
   const stamp = document.createElement('div');
   stamp.className = 'snap-stamp';
   stamp.textContent = SNAP_SYSTEM_NAME + ' · หมวดทางหลวงเชิงเนิน แขวงทางหลวงระยอง · คัดลอกเมื่อ ' + (() => { const n = new Date(), z = x => String(x).padStart(2, '0'); return formatThaiDateFull(n.getFullYear() + '-' + z(n.getMonth() + 1) + '-' + z(n.getDate())) + ' เวลา ' + z(n.getHours()) + ':' + z(n.getMinutes()); })() + ' น.';
@@ -5088,7 +5088,7 @@ function openCaseDetailModal(id){
                 </dl></div>
               <div class="cd-card"><div class="cd-sec">การแจ้งความ</div>
                 <dl class="cd-dl">
-                  <dt>เลขคดี / เลขรับแจ้งความ</dt><dd style="font-size:13px">${cdVal(policeCaseNo(rec))}</dd>
+                  <dt>เลขรับแจ้งความ</dt><dd style="font-size:13px">${cdVal(policeCaseNo(rec))}</dd>
                   <dt>แจ้งความเมื่อ</dt><dd>${cdVal(formatThaiDateFull(rec.reportedDate))}</dd>
                   <dt>ตำรวจผู้ลงบันทึก</dt><dd>${cdVal(rec.policeOfficer)}</dd>
                   <dt>โทร</dt><dd>${cdVal(rec.policePhone)}</dd>
@@ -5872,7 +5872,7 @@ function buildCasesSheet(wb, rows, seqMap){
     ['อำเภอ', 1, 14, 'text', r => r.amphoe || ''],
     ['จังหวัด', 1, 12, 'text', r => r.changwat || ''],
     ['หมู่ที่', 1, 9, 'text', r => r.moo || ''],
-    ['เลขคดี / เลขรับแจ้งความ', 2, 20, 'text', r => policeCaseNo(r)],
+    ['เลขรับแจ้งความ', 2, 20, 'text', r => policeCaseNo(r)],
     ['แจ้งความเมื่อ', 2, 13, 'date', r => xlDate(r.reportedDate)],
     ['ตำรวจผู้ลงบันทึก', 2, 24, 'text', r => r.policeOfficer || ''],
     ['เบอร์โทรตำรวจ', 2, 14, 'text', r => r.policePhone || ''],
@@ -6109,7 +6109,7 @@ tbody tr.tot td{font-weight:700;background:#ecefe9;border-top:2px solid #123a5e}
   <div class="tile"><b>${s.arrest.toLocaleString('th-TH')}</b><span>รอสอบปากคำ</span></div>
 </div>
 <table class="rep">
-<thead><tr class="sp"><td colspan="10"></td></tr><tr><th style="width:7.5%">เลขที่เคส</th><th style="width:8%">วันที่</th><th style="width:13%">ทล. / ตอน</th><th style="width:6.5%">กม.</th><th style="width:15%">สภ. / บริเวณ</th><th style="width:9.5%">เลขคดี</th><th style="width:9.5%">มูลค่า (บาท)</th><th style="width:10%">ผู้ต้องสงสัย</th><th style="width:14%">สถานะคดี</th><th style="width:7%">ปิดคดี</th></tr></thead>
+<thead><tr class="sp"><td colspan="10"></td></tr><tr><th style="width:7.5%">เลขที่เคส</th><th style="width:8%">วันที่</th><th style="width:13%">ทล. / ตอน</th><th style="width:6.5%">กม.</th><th style="width:13%">สภ. / บริเวณ</th><th style="width:11.5%">เลขรับแจ้งความ</th><th style="width:9.5%">มูลค่า (บาท)</th><th style="width:10%">ผู้ต้องสงสัย</th><th style="width:14%">สถานะคดี</th><th style="width:7%">ปิดคดี</th></tr></thead>
 <tbody>${body}<tr class="tot"><td colspan="6" class="r">รวม ${s.total.toLocaleString('th-TH')} เคส</td><td class="r nw">${th(formatMoney(s.value))}</td><td colspan="3"></td></tr></tbody>
 <tfoot><tr class="sp"><td colspan="10"></td></tr></tfoot>
 </table>
