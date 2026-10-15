@@ -4860,6 +4860,23 @@ async function buildCaseImage(){
   // ตัดแถว "ผู้บันทึก" ออกจากรูปที่คัดลอก
   clone.querySelectorAll('.cd-dl dt').forEach(dt => { if (dt.textContent.trim() === 'ผู้บันทึก') { const dd = dt.nextElementSibling; dt.remove(); if (dd && dd.tagName === 'DD') dd.remove(); } });
   snapStripPhones(clone);
+  // "สภ.X" → ชื่อเต็ม "สถานีตำรวจภูธรX" (เฉพาะในรูปที่คัดลอก) · "สภ.เมือง" ต่อชื่อจังหวัดจากแถว "พื้นที่" เป็น "เมืองระยอง" · ถ้าต่อจังหวัดไม่ได้ คงตัวย่อไว้ ไม่เดาชื่อ
+  (() => {
+    const dts = [...clone.querySelectorAll('.cd-dl dt')];
+    const dtOf = label => dts.find(dt => dt.textContent.trim() === label);
+    const stDt = dtOf('สภ.'), areaDt = dtOf('พื้นที่');
+    const stDd = stDt && stDt.nextElementSibling;
+    if (!stDd || stDd.querySelector('.cd-na')) return;
+    const m = /^สภ\.\s*(.+)$/.exec(stDd.textContent.trim());
+    if (!m) return;
+    let name = m[1].trim();
+    if (name === 'เมือง') {
+      const pm = areaDt && areaDt.nextElementSibling ? /จ\.\s*(\S+)/.exec(areaDt.nextElementSibling.textContent) : null;
+      if (!pm) return;
+      name += pm[1];
+    }
+    stDd.textContent = 'สถานีตำรวจภูธร' + name;
+  })();
   const mk = (cls, kids) => { const d = document.createElement('div'); if (cls) d.className = cls; (kids || []).forEach(k => k && d.appendChild(k)); return d; };
   const hd = clone.querySelector('.cd-hd');
   const bodyEl = clone.querySelector('.modal-body');
