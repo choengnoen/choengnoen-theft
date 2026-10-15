@@ -1163,7 +1163,10 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .snap .cd-prog{padding:8px 12px;margin-bottom:0;gap:10px}
 .snap .cd-st b{font-size:13px}.snap .cd-ss{font-size:12px}
 .snap .cd-dl.wide dd.full{grid-column:2 / -1}
+.snap .cd-card{flex-shrink:0;overflow:visible}
 .snap .snap-itemscard{margin-top:10px}
+.snap .snap-itemscard .snap-items2{column-gap:32px}
+.snap .snap-sz{display:block;font-weight:600}
 .snap .snap-itemscard .cd-item{align-items:center;padding:6px 0;line-height:1.6}
 .snap .snap-itemscard .cd-item > div{flex:1;min-width:0}
 .snap .snap-itemscard .cd-item b{font-size:14px;line-height:1.6}
@@ -4881,7 +4884,27 @@ async function buildCaseImage(){
   const nLeft = Math.ceil(infoCards.length / 2);
   const grid = mk('snap-grid', [mk('snap-col', infoCards.slice(0, nLeft)), mk('snap-col', [...infoCards.slice(nLeft), photoCard])]);
   grid.style.gridTemplateColumns = '1fr 1fr';
-  if (itemsCard) itemsCard.classList.add('snap-itemscard');
+  if (itemsCard) {
+    itemsCard.classList.add('snap-itemscard');
+    // ชื่อวัสดุ: ตัดบรรทัดเองก่อนส่วนที่เป็นขนาด/สเปก (หนา · ยาว · กว้าง · ขนาด · Dia · 16x30) → บรรทัดแรก = ชื่อ, บรรทัดสอง = ขนาด
+    const SZ = /\s+(?=(?:หนา|ยาว|กว้าง|สูง)\s*\d|ขนาด|Dia|เส้นผ่าน|\d+(?:\.\d+)?\s*[xX×]\s*\d)/;
+    itemsCard.querySelectorAll(':scope > .cd-item > div > b').forEach(b => {
+      const txt = b.textContent.trim(), m = SZ.exec(txt);
+      if (!m || m.index === 0) return;
+      const sz = document.createElement('span');
+      sz.className = 'snap-sz';
+      sz.textContent = txt.slice(m.index + m[0].length);
+      b.textContent = txt.slice(0, m.index);
+      b.appendChild(sz);
+    });
+    // รายการ ≥ 4 → แบ่ง 2 คอลัมน์ เรียงสลับซ้าย-ขวาเป็นแถว (น้อยกว่านั้นคอลัมน์เดียว)
+    const its = [...itemsCard.querySelectorAll(':scope > .cd-item')];
+    if (its.length >= 4) {
+      const half = Math.ceil(its.length / 2), cells = [];
+      for (let i = 0; i < half; i++) cells.push(its[i], its[half + i] || mk('', []));
+      itemsCard.insertBefore(mk('snap-items2', cells), itemsCard.querySelector(':scope > .cd-receipt'));
+    }
+  }
 
   const shell = document.createElement('div');
   shell.className = 'modal case-modal snap';
