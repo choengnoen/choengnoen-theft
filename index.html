@@ -4888,17 +4888,6 @@ async function buildCaseImage(){
   grid.style.gridTemplateColumns = '1fr 1fr';
   if (itemsCard) {
     itemsCard.classList.add('snap-itemscard');
-    // ชื่อวัสดุ: ตัดบรรทัดเองก่อนส่วนที่เป็นขนาด/สเปก (หนา · ยาว · กว้าง · ขนาด · Dia · 16x30) → บรรทัดแรก = ชื่อ, บรรทัดสอง = ขนาด
-    const SZ = /\s+(?=(?:หนา|ยาว|กว้าง|สูง)\s*\d|ขนาด|Dia|เส้นผ่าน|\d+(?:\.\d+)?\s*[xX×]\s*\d)/;
-    itemsCard.querySelectorAll(':scope > .cd-item > div > b').forEach(b => {
-      const txt = b.textContent.trim(), m = SZ.exec(txt);
-      if (!m || m.index === 0) return;
-      const sz = document.createElement('span');
-      sz.className = 'snap-sz';
-      sz.textContent = txt.slice(m.index + m[0].length);
-      b.textContent = txt.slice(0, m.index);
-      b.appendChild(sz);
-    });
   }
 
   const shell = document.createElement('div');
@@ -4922,6 +4911,18 @@ async function buildCaseImage(){
   }
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    // ชื่อวัสดุ: ตัดบรรทัดเฉพาะชื่อที่ยาวจนล้นบรรทัดเดียว (วัดจากหน้าจริง) และตัดตรงก่อนส่วนขนาด/สเปก
+    //   (หนา · ยาว · กว้าง · สูง · ขนาด · Dia · 16x30) → บรรทัดแรก = ชื่อ, บรรทัดสอง = ขนาด · ชื่อที่พอดีบรรทัดเดียวไม่แตะ
+    if (itemsCard) {
+      const SZ = /\s+(?=(?:หนา|ยาว|กว้าง|สูง)\s*\d|ขนาด|Dia|เส้นผ่าน|\d+(?:\.\d+)?\s*[xX×]\s*\d)/;
+      itemsCard.querySelectorAll(':scope > .cd-item > div > b').forEach(b => {
+        if (b.getClientRects().length <= 1) return;
+        const txt = b.textContent.trim(), m = SZ.exec(txt);
+        if (!m || m.index === 0) return;
+        b.textContent = '';
+        b.append(txt.slice(0, m.index), document.createElement('br'), txt.slice(m.index + m[0].length));
+      });
+    }
     const canvas = await window.html2canvas(shell, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1100 });
     return await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('สร้างรูปไม่สำเร็จ')), 'image/png'));
   } finally { stage.remove(); }
