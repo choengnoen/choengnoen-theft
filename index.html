@@ -4970,7 +4970,7 @@ function openCaseDetailModal(id){
       <div class="hint" style="text-align:right;margin-top:2px">ไม่รวมค่าแรง / ค่าเครื่องจักร</div>
     </div>`;
 
-  const areaText = [rec.tambon ? 'ต.' + rec.tambon : '', rec.amphoe ? 'อ.' + rec.amphoe : '', rec.changwat ? 'จ.' + rec.changwat : ''].filter(Boolean).join(' ');
+  const areaText = [rec.moo ? 'ม.' + String(rec.moo).replace(/^\s*(?:หมู่ที่|หมู่|ม\.)\s*/, '') : '', rec.tambon ? 'ต.' + rec.tambon : '', rec.amphoe ? 'อ.' + rec.amphoe : '', rec.changwat ? 'จ.' + rec.changwat : ''].filter(Boolean).join(' ');
 
   const root = document.getElementById('modalRoot');
   root.innerHTML = `
@@ -4997,9 +4997,7 @@ function openCaseDetailModal(id){
                   <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
                   <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
-                  <dt>พื้นที่</dt><dd>${cdVal(areaText)}</dd>
-                  ${rec.moo ? `<dt>หมู่ที่</dt><dd>${escapeHtml(rec.moo)}</dd>` : ''}
-                </dl></div>
+                  <dt>พื้นที่</dt><dd>${cdVal(areaText)}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">การมอบหมายแจ้งความ</div>
                 <dl class="cd-dl">
                   <dt>มอบโดย</dt><dd>${cdVal(rec.assignedBy)}</dd>
