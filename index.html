@@ -934,6 +934,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .cd-cell.cd-grow{flex:1;min-width:150px}
 .cd-k{display:block;font-size:12px;color:rgba(255,255,255,.75)}
 .cd-v{display:block;font-family:'Kanit',sans-serif;font-weight:600;font-size:24px;line-height:1.3;color:#fff}
+.cd-v .cd-v-sub{font-size:.7em;font-weight:500;opacity:.85}
 .cd-extra{padding:0 22px 14px;font-size:13px;color:rgba(255,255,255,.85)}
 @media(max-width:760px){.cd-type{font-size:22px}.cd-v{font-size:20px}.cd-band{flex-wrap:wrap}}
 .case-modal > .modal-body{background:var(--paper);padding:18px 20px 8px 26px;margin-right:0}
@@ -4828,6 +4829,8 @@ async function buildCaseImage(){
   await waitCasePhotosReady();
   const clone = src.cloneNode(true);
   clone.querySelectorAll('.cd-foot,.cd-hd-actions,.modal-close').forEach(e => e.remove());
+  // ตัดแถว "ผู้บันทึก" ออกจากรูปที่คัดลอก
+  clone.querySelectorAll('.cd-dl dt').forEach(dt => { if (dt.textContent.trim() === 'ผู้บันทึก') { const dd = dt.nextElementSibling; dt.remove(); if (dd && dd.tagName === 'DD') dd.remove(); } });
   snapStripPhones(clone);
   const mk = (cls, kids) => { const d = document.createElement('div'); if (cls) d.className = cls; (kids || []).forEach(k => k && d.appendChild(k)); return d; };
   const hd = clone.querySelector('.cd-hd');
@@ -5037,7 +5040,7 @@ function openCaseDetailModal(id){
           <div class="cd-cells">
             <div class="cd-cell"><span class="cd-k">ทางหลวงหมายเลข</span><span class="cd-v">ทล.${escapeHtml(rec.highway)}</span></div>
             <div class="cd-cell cd-grow"><span class="cd-k">ตอน</span><span class="cd-v">${escapeHtml(rec.section)}</span></div>
-            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>${rec.side ? '<div class="cd-cell"><span class="cd-k">ด้าน</span><span class="cd-v">' + escapeHtml(rec.side) + '</span></div>' : ''}
+            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>${rec.side ? '<div class="cd-cell"><span class="cd-k">ด้าน</span><span class="cd-v">' + escapeHtml(String(rec.side).trim().split(/\s+/)[0]) + (String(rec.side).trim().split(/\s+/).length > 1 ? ' <span class="cd-v-sub">' + escapeHtml(String(rec.side).trim().split(/\s+/).slice(1).join(' ')) + '</span>' : '') + '</span></div>' : ''}
           </div>
         </div>
         <div class="modal-body">
@@ -5047,7 +5050,6 @@ function openCaseDetailModal(id){
               <div class="cd-card"><div class="cd-sec">ข้อมูลเหตุโจรกรรม</div>
                 <dl class="cd-dl">
                   <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
-                  <dt>ตำแหน่ง</dt><dd>${cdVal(rec.location)}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(areaText)}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">การมอบหมายแจ้งความ</div>
