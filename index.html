@@ -5489,7 +5489,7 @@ function renderGuide(){
   if (!root) return;
   const G = GUIDE_DATA, esc = escapeHtml;
   const secHtml = G.sections.map(t => `
-    <div class="cd-card" style="margin-bottom:10px">
+    <div class="cd-card" style="margin-bottom:34px">
       <div class="cd-sec" style="flex-wrap:wrap"><span>${esc(t.title)}</span></div>
       ${t.strip ? `<div class="gd-strip" style="--n:${t.strip.length}">${t.strip.map(n => `<div class="gd-node${n.hot ? ' hot' : ''}"><span class="k">${esc(n.k)}</span><div class="ic">${n.ic}</div><h4>${esc(n.h)}</h4><p>${esc(n.p)}</p></div>`).join('')}</div>` : ''}
       ${t.steps.map((s, i) => `<div class="gd-panel${s.subs ? ' hd' : ''}"><h3><i>${i + 1}</i><span>${esc(s.text)}</span></h3>${s.subs ? `<ul class="gd-ul">${s.subs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</div>`).join('')}
