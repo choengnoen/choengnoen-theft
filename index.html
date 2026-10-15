@@ -1062,6 +1062,36 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 .gd-doc small{color:var(--amber-deep)}
 .gd-meta{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink-soft)}
 .gd-meta b{color:var(--ink)}
+.gd-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+/* เอกสารประกอบงาน แบบ 1: แถบขั้นตอน + แผงรายละเอียด (โครงเดียวกับระบบอุบัติเหตุ) */
+.gd-strip{display:grid;grid-template-columns:repeat(var(--n,4),1fr);gap:0;margin:18px 0 6px}
+.gd-node{position:relative;background:#fff;border:2px solid var(--navy-700);border-radius:14px;padding:14px 10px 12px;margin-right:28px;text-align:center}
+.gd-node:last-child{margin-right:0}
+.gd-node:not(:last-child)::after{content:"➜";position:absolute;right:-28px;top:50%;transform:translateY(-50%);width:28px;text-align:center;color:var(--navy-700);font-size:18px}
+.gd-node .k{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--navy-700);color:#fff;border-radius:999px;padding:0 11px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.gd-node .ic{font-size:26px;line-height:1.2}
+.gd-node h4{margin:3px 0 1px;font-family:'Kanit',sans-serif;font-weight:600;font-size:14px;color:var(--ink)}
+.gd-node p{margin:0;font-size:12px;color:var(--ink-mute)}
+.gd-node.hot{background:var(--amber-glow);border-color:var(--amber)}
+.gd-node.hot .k{background:var(--amber)}
+.gd-node.hot::after{color:var(--amber)}
+.gd-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-top:12px}
+.gd-panel>h3{margin:0;font-family:'Kanit',sans-serif;font-weight:600;font-size:15px;color:var(--ink);display:flex;gap:9px;align-items:flex-start}
+.gd-panel>h3 i{font-style:normal;flex:none;width:26px;height:26px;border-radius:50%;background:var(--navy-700);color:#fff;display:grid;place-items:center;font-size:13px;margin-top:1px}
+.gd-panel>h3 span{font-family:'Sarabun',sans-serif;font-weight:500;font-size:14.5px}
+.gd-panel.hd>h3{margin-bottom:8px}
+.gd-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gd-row{display:flex;gap:10px;align-items:center;background:var(--paper);border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:13.5px}
+.gd-row:last-child{margin-bottom:0}
+.gd-row b{color:var(--navy-700);flex:none;min-width:14px}
+.gd-row .q{margin-left:auto;flex:none;background:var(--navy-700);color:#fff;border-radius:999px;padding:0 11px;font-size:12px;font-weight:600;white-space:nowrap}
+.gd-row small{color:var(--amber-deep)}
+@media (max-width:760px){
+.gd-strip{grid-template-columns:1fr;gap:24px}
+.gd-node{margin:0}
+.gd-node:not(:last-child)::after{content:"⬇";right:auto;left:50%;top:auto;bottom:-26px;transform:translateX(-50%)}
+.gd-two,.gd-meta{grid-template-columns:1fr}
+}
 
 /* ชิปตัวกรองที่เลือก (สายทาง/pill) ให้เหมือนปุ่ม "ทุกปีงบประมาณ" */
 .hw-tab-filter button.active,.pill-filter button.active{font-family:'Kanit',sans-serif;font-weight:600;box-shadow:0 4px 12px -2px rgba(224,98,15,.4)}
@@ -5007,7 +5037,7 @@ function openCaseDetailModal(id){
           <div class="cd-cells">
             <div class="cd-cell"><span class="cd-k">ทางหลวงหมายเลข</span><span class="cd-v">ทล.${escapeHtml(rec.highway)}</span></div>
             <div class="cd-cell cd-grow"><span class="cd-k">ตอน</span><span class="cd-v">${escapeHtml(rec.section)}</span></div>
-            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>
+            <div class="cd-cell"><span class="cd-k">กิโลเมตร</span><span class="cd-v">กม.${escapeHtml(formatKm(rec.km))}</span></div>${rec.side ? '<div class="cd-cell"><span class="cd-k">ด้าน</span><span class="cd-v">' + escapeHtml(rec.side) + '</span></div>' : ''}
           </div>
         </div>
         <div class="modal-body">
@@ -5017,7 +5047,7 @@ function openCaseDetailModal(id){
               <div class="cd-card"><div class="cd-sec">ข้อมูลเหตุโจรกรรม</div>
                 <dl class="cd-dl">
                   <dt>วันเวลาเกิดเหตุ</dt><dd>${cdVal(rec.dateIncident ? formatThaiDate(rec.dateIncident) + (rec.time ? ' · ' + String(rec.time).replace(/\s*น\.?$/, '') + ' น.' : '') : '')}</dd>
-                  <dt>ตำแหน่ง</dt><dd>${cdVal(formatPosition(rec))}</dd>
+                  <dt>ตำแหน่ง</dt><dd>${cdVal(rec.location)}</dd>
                   <dt>สภ.</dt><dd>${cdVal(rec.policeStation)}</dd>
                   <dt>พื้นที่</dt><dd>${cdVal(areaText)}</dd>                </dl></div>
               <div class="cd-card"><div class="cd-sec">การมอบหมายแจ้งความ</div>
@@ -5321,6 +5351,12 @@ const GUIDE_DATA = {
   sections: [
     {
       title: '8.1 การโจรกรรมอุปกรณ์งานทาง', tag: '8. งานการรายงานต่างๆ',
+      strip: [
+        { k: 'ทันที', ic: '🔍', h: 'ตรวจพบ', p: 'จัดทำบันทึก', hot: true },
+        { k: 'ขั้น 2', ic: '👮', h: 'แจ้งความ', p: 'พนักงานสอบสวน' },
+        { k: 'ขั้น 3', ic: '✍️', h: 'ลงนาม', p: 'หัวหน้าหมวดฯ' },
+        { k: 'ขั้น 4', ic: '📤', h: 'เสนอ', p: 'ผู้บังคับบัญชา' }
+      ],
       steps: [
         { text: 'หากมีการตรวจพบว่า มีการโจรกรรมอุปกรณ์งานทาง ให้จัดทำรายงานเป็นบันทึก โดยมีรายละเอียดวันที่เวลาที่ตรวจพบ สถานที่ กม. สายทาง ทรัพย์สิน ชนิด จำนวนที่สูญหาย ประมาณราคา และหัวหน้าหมวดการทางต้องดำเนินการแจ้งความร้องทุกข์กับพนักงานสอบสวน (ตำรวจ)' },
         { text: 'นำบันทึก ให้หัวหน้าหมวดการทางลงนาม และนำส่งพร้อมรายงานประจำวันเกี่ยวกับคดีของพนักงานสอบสวน (ตำรวจ) เสนอผู้บังคับบัญชาต่อไป' }
@@ -5337,6 +5373,12 @@ const GUIDE_DATA = {
     },
     {
       title: '8.2 งานการรายงานภัยแล้ง', tag: '8. งานการรายงานต่างๆ',
+      strip: [
+        { k: 'ขั้น 1', ic: '📞', h: 'รับคำขอ', p: 'จังหวัด/อปท.' },
+        { k: 'ขั้น 2', ic: '📝', h: 'บันทึกแบบ', p: 'รายงานภัยแล้ง' },
+        { k: 'ขั้น 3', ic: '✍️', h: 'ลงนาม', p: 'หัวหน้าหมวดฯ' },
+        { k: 'ขั้น 4', ic: '📤', h: 'เสนอ', p: 'หน่วยเหนือ' }
+      ],
       steps: [
         { text: 'กรณีได้รับการขอความช่วยเหลือจากจังหวัด/องค์กรปกครองส่วนท้องถิ่น ในเรื่องการให้ความช่วยเหลือภัยแล้ง (การแจกจ่ายน้ำ) บันทึกข้อมูลตามแบบรายงานภัยแล้ง โดยหัวหน้าหมวดการทางลงนาม เสนอหน่วยเหนือต่อไป' }
       ],
@@ -5349,6 +5391,11 @@ const GUIDE_DATA = {
     },
     {
       title: '8.3 งานการรายงานไฟไหม้ในเขตทางหลวง', tag: '8. งานการรายงานต่างๆ',
+      strip: [
+        { k: 'ขั้น 1', ic: '🔥', h: 'มีไฟไหม้หญ้า', p: 'บันทึกแบบรายงาน' },
+        { k: 'ขั้น 2', ic: '✍️', h: 'ลงนาม', p: 'หัวหน้าหมวดฯ' },
+        { k: 'ขั้น 3', ic: '📤', h: 'เสนอ', p: 'หน่วยเหนือ' }
+      ],
       steps: [
         { text: 'กรณีมีไฟไหม้หญ้าในเขตทางหลวง ให้บันทึกในแบบรายงาน โดยหัวหน้าหมวดการทางลงนาม เสนอหน่วยเหนือต่อไป' },
         { text: 'กรณีไม่มีเหตุการณ์ดังกล่าว ให้จัดทำบันทึก โดยหัวหน้าหมวดการทางลงนาม เสนอผู้บังคับบัญชาต่อไป' }
@@ -5433,12 +5480,15 @@ function renderGuide(){
   const secHtml = G.sections.map(t => `
     <div class="cd-card" style="margin-bottom:10px">
       <div class="cd-sec" style="flex-wrap:wrap"><span>${esc(t.title)}</span></div>
-      <div class="gd-h" style="margin-top:0">รายละเอียดการปฏิบัติงาน</div>
-      <ol class="gd-ol">${t.steps.map(s => `<li>${esc(s.text)}${s.subs ? `<ul>${s.subs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>
-      ${t.forms && t.forms.length ? `<div class="gd-h">แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</div><ul class="gd-ul">${t.forms.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-      <div class="gd-h">เอกสารหลักฐานที่ต้องจัดส่ง</div>
-      ${t.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}${d.cond ? ` <small>(${esc(d.cond)})</small>` : ''}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}
-      ${t.extra ? `<div class="gd-h">${esc(t.extra.title)}</div>${t.extra.docs.map((d, i) => `<div class="gd-doc"><span class="ic">${i + 1}.</span><span>${esc(d.label)}</span><span class="q">${esc(d.qty || '')}</span></div>`).join('')}` : ''}
+      ${t.strip ? `<div class="gd-strip" style="--n:${t.strip.length}">${t.strip.map(n => `<div class="gd-node${n.hot ? ' hot' : ''}"><span class="k">${esc(n.k)}</span><div class="ic">${n.ic}</div><h4>${esc(n.h)}</h4><p>${esc(n.p)}</p></div>`).join('')}</div>` : ''}
+      ${t.steps.map((s, i) => `<div class="gd-panel${s.subs ? ' hd' : ''}"><h3><i>${i + 1}</i><span>${esc(s.text)}</span></h3>${s.subs ? `<ul class="gd-ul">${s.subs.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</div>`).join('')}
+      <div class="gd-two">
+        ${t.forms && t.forms.length ? `<div class="gd-panel hd"><h3>📄 แบบฟอร์ม/เอกสารที่เกี่ยวข้อง</h3><ul class="gd-ul">${t.forms.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+        <div class="gd-panel hd"><h3>📁 เอกสารหลักฐานที่ต้องจัดส่ง</h3>
+          ${t.docs.map((d, i) => `<div class="gd-row"><b>${i + 1}</b><span>${esc(d.label)}${d.cond ? ` <small>(${esc(d.cond)})</small>` : ''}</span>${d.qty ? `<span class="q">${esc(d.qty)}</span>` : ''}</div>`).join('')}
+          ${t.extra ? `<div class="gd-h">${esc(t.extra.title)}</div>${t.extra.docs.map((d, i) => `<div class="gd-row"><b>${i + 1}</b><span>${esc(d.label)}</span>${d.qty ? `<span class="q">${esc(d.qty)}</span>` : ''}</div>`).join('')}` : ''}
+        </div>
+      </div>
       <div class="gd-meta"><span>กำหนดส่งรายงาน: <b>${esc(t.due)}</b></span><span>การจัดเก็บสำเนา: <b>${esc(t.keep)}</b></span></div>
     </div>`).join('');
   root.innerHTML = `
