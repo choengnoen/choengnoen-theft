@@ -140,7 +140,19 @@ h1,h2,h3,.display{font-family:'Kanit',sans-serif;font-weight:700}
   border:1px solid var(--line);border-radius:8px;
   padding:8px 10px;background:#fff;color:var(--ink);
   transition:border-color .15s ease,box-shadow .15s ease;
+  width:100%;min-width:0;box-sizing:border-box;
 }
+.field input:not([type=checkbox]):not([type=radio]):not([type=hidden]),.field select{height:42px}
+.field input[type=date],.field input[type=time],.field input[type=month]{-webkit-appearance:none;appearance:none;display:block;text-align:left}
+.field input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.4em}
+.field{min-width:0}
+.grid>*{min-width:0}
+.grid-4>.span-2{grid-column:span 2}
+.grid-4>.span-3{grid-column:span 3}
+.grid.sec-sub{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+@media(max-width:720px){.grid-4>.span-2,.grid-4>.span-3{grid-column:auto}}
+.field .combo{width:100%;position:relative}
+.field input[type=date]{min-width:0;max-width:100%;inline-size:100%}
 .field input:focus,.field select:focus,.field textarea:focus{
   outline:none;border-color:var(--amber-500);
   box-shadow:0 0 0 3px rgba(224,98,15,.14);
@@ -1240,7 +1252,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 
     <div class="card" id="fsec2">
       <div class="section-title" style="justify-content:space-between">
-        <span style="display:flex;align-items:center;gap:8px"><span class="num">2</span> รายการทรัพย์สินที่ถูกขโมย (ประเมินค่าเสียหาย)</span>
+        <span style="display:flex;align-items:center;gap:8px"><span class="num">2</span> รายการทรัพย์สินที่ถูกขโมย</span>
       </div>
 
       <div class="it-toolbar">
@@ -1305,52 +1317,43 @@ tr.route-editable:hover td{background:var(--amber-glow)}
     <div class="card" id="fsec4">
       <div class="section-title"><span class="num">4</span> การแจ้งความและผู้ต้องสงสัย</div>
 
-      <div class="party-block" data-role="main">
-        <div class="party-block-title"><span>การแจ้งความ</span></div>
-        <div class="grid grid-3">
-          <div class="field">
-            <label>เลขคดี / เลขรับแจ้งความ</label>
-            <input type="text" id="f_reportLetterNo" placeholder="เช่น CC70129256914294B">
-          </div>
-          <div class="field">
-            <label>แจ้งความเมื่อวันที่</label>
-            <input type="date" id="f_reportedDate">
-          </div>
+      <div class="grid grid-4">
+        <div class="field">
+          <label>เลขคดี / เลขรับแจ้งความ</label>
+          <input type="text" id="f_reportLetterNo" placeholder="เช่น CC70129256914294B">
         </div>
-        <div class="grid grid-3" style="margin-top:12px">
-          <div class="field">
-            <label>ชื่อ-ตำแหน่งตำรวจที่ลงบันทึกประจำวัน</label>
-            <input type="text" id="f_policeOfficer">
-          </div>
-          <div class="field">
-            <label>เบอร์โทรติดต่อ</label>
-            <input type="text" id="f_policePhone">
-          </div>
+        <div class="field">
+          <label>แจ้งความเมื่อวันที่</label>
+          <input type="date" id="f_reportedDate">
+        </div>
+        <div class="field">
+          <label>ตำรวจที่ลงบันทึกประจำวัน (ชื่อ-ตำแหน่ง)</label>
+          <input type="text" id="f_policeOfficer">
+        </div>
+        <div class="field">
+          <label>เบอร์โทรติดต่อ</label>
+          <input type="text" id="f_policePhone">
         </div>
       </div>
-
-      <div class="party-block" data-role="suspect">
-        <div class="party-block-title"><span>ผู้ต้องสงสัย</span></div>
-        <div class="grid grid-3">
-          <div class="field">
-            <label>กรณีพบผู้ต้องสงสัย</label>
-            <select id="f_suspectStatus">
-              <option value="">— ยังไม่ระบุ —</option>
-              <option value="พบ">พบ</option>
-              <option value="ไม่พบ">ไม่พบ</option>
-            </select>
-          </div>
-          <div class="field" id="f_suspectNameWrap" style="display:none">
-            <label>ชื่อ-นามสกุลผู้ต้องสงสัย</label>
-            <input type="text" id="f_suspectName">
-          </div>
+      <div class="grid grid-4 sec-sub">
+        <div class="field">
+          <label>กรณีพบผู้ต้องสงสัย</label>
+          <select id="f_suspectStatus">
+            <option value="">— ยังไม่ระบุ —</option>
+            <option value="พบ">พบ</option>
+            <option value="ไม่พบ">ไม่พบ</option>
+          </select>
+        </div>
+        <div class="field span-3" id="f_suspectNameWrap" style="display:none">
+          <label>ชื่อ-นามสกุลผู้ต้องสงสัย</label>
+          <input type="text" id="f_suspectName">
         </div>
       </div>
     </div>
 
     <div class="card" id="fsec5">
       <div class="section-title"><span class="num">5</span> ผลการติดตามคดี <span class="sub">กรอกภายหลังได้</span></div>
-      <div class="grid grid-3">
+      <div class="grid grid-4">
         <div class="field">
           <label>สถานะคดี</label>
           <select id="f_status">
@@ -1364,17 +1367,16 @@ tr.route-editable:hover td{background:var(--amber-glow)}
           <label>ปิดคดี (วันที่)</label>
           <input type="date" id="f_closedDate">
         </div>
-        <div class="field">
+        <div class="field span-2">
           <label>หมายเหตุ</label>
           <input type="text" id="f_note">
         </div>
       </div>
       <!-- แผน 14: ติดตามนำส่งเอกสารถึงแขวงภายใน 10 วัน (นับจากวันแจ้งความ) — ระบบแจ้งเตือน LINE อ่านสองช่องนี้ -->
-      <div class="grid grid-3" style="margin-top:12px">
+      <div class="grid grid-4" style="margin-top:12px">
         <div class="field">
           <label>ส่งเอกสารถึงแขวงเมื่อ (วันที่)</label>
           <input type="date" id="f_sentToDistrictDate">
-          <div class="hint">ภายใน 10 วันนับจากวันแจ้งความ — กรอกวันที่ส่งแล้ว ระบบแจ้งเตือนจะเลิกติดตามเรื่องนี้</div>
         </div>
       </div>
 
@@ -1387,7 +1389,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
 
     <div class="card" id="fsecPhoto">
       <div class="section-title">
-        <span class="num">6</span> รูปถ่ายประกอบ <span class="ph-count" id="photoCount">ยังไม่มีรูป</span>
+        <span class="num">6</span> รูปถ่ายประกอบ <span class="ph-count" id="photoCount" style="display:none"></span>
       </div>
       <div id="photoBody">
         <div class="ph-grid" id="photoGrid"></div>
@@ -3726,7 +3728,8 @@ function renderPhotoSlots(){
   const grid = document.getElementById('photoGrid');
   if (!grid) return;
   const nPh = formPhotos.filter(Boolean).length, cnt = document.getElementById('photoCount');
-  cnt.textContent = nPh ? ('มี ' + nPh + ' รูป') : 'ยังไม่มีรูป';
+  cnt.textContent = nPh ? ('มี ' + nPh + ' รูป') : '';
+  cnt.style.display = nPh ? '' : 'none';
   cnt.classList.toggle('has', nPh > 0);
   const on = !!(window.FBL && FBL.photosEnabled);
   document.getElementById('photoHint').textContent = on
@@ -5007,6 +5010,14 @@ function openCaseDetailModal(id){
                   <dt>ตำแหน่ง</dt><dd>${cdVal(rec.assignedToPosition)}</dd>
                   <dt>โทร</dt><dd>${cdVal(rec.assignedToPhone)}</dd>
                 </dl></div>
+              <div class="cd-card"><div class="cd-sec">การแจ้งความ</div>
+                <dl class="cd-dl">
+                  <dt>เลขคดี / เลขรับแจ้งความ</dt><dd style="font-size:13px">${cdVal(policeCaseNo(rec))}</dd>
+                  <dt>แจ้งความเมื่อ</dt><dd>${cdVal(formatThaiDate(rec.reportedDate))}</dd>
+                  <dt>ตำรวจผู้ลงบันทึก</dt><dd>${cdVal(rec.policeOfficer)}</dd>
+                  <dt>โทร</dt><dd>${cdVal(rec.policePhone)}</dd>
+                  <dt>ผู้ต้องสงสัย</dt><dd>${escapeHtml(rec.suspectStatus) || 'ไม่ระบุ'}${rec.suspectStatus === 'พบ' && rec.suspectName ? ' — ' + escapeHtml(rec.suspectName) : ''}</dd>
+                </dl></div>
               <div class="cd-card"><div class="cd-sec">หมายเหตุ</div>
                 <dl class="cd-dl">
                   ${rec.note ? `<dt>หมายเหตุ</dt><dd>${escapeHtml(rec.note)}</dd>` : ''}
@@ -5021,14 +5032,6 @@ function openCaseDetailModal(id){
               ${casePhotosCardHtml(rec)}
               <div class="cd-card"><div class="cd-sec">รายการทรัพย์สินที่ถูกขโมย <span class="cd-count">${items.length} รายการ</span></div>
                 ${itemsHtml}${receiptHtml}</div>
-              <div class="cd-card"><div class="cd-sec">การแจ้งความ</div>
-                <dl class="cd-dl">
-                  <dt>เลขคดี / เลขรับแจ้งความ</dt><dd style="font-size:13px">${cdVal(policeCaseNo(rec))}</dd>
-                  <dt>แจ้งความเมื่อ</dt><dd>${cdVal(formatThaiDate(rec.reportedDate))}</dd>
-                  <dt>ตำรวจผู้ลงบันทึก</dt><dd>${cdVal(rec.policeOfficer)}</dd>
-                  <dt>โทร</dt><dd>${cdVal(rec.policePhone)}</dd>
-                  <dt>ผู้ต้องสงสัย</dt><dd>${escapeHtml(rec.suspectStatus) || 'ไม่ระบุ'}${rec.suspectStatus === 'พบ' && rec.suspectName ? ' — ' + escapeHtml(rec.suspectName) : ''}</dd>
-                </dl></div>
             </div>
           </div>
         </div>
