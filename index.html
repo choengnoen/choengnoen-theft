@@ -129,6 +129,17 @@ h1,h2,h3,.display{font-family:'Kanit',sans-serif;font-weight:700}
 .grid-2{grid-template-columns:1fr 1fr}
 .grid-3{grid-template-columns:1fr 1fr 1fr}
 .grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+/* รายชื่อผู้รับมอบหมาย: การ์ดรายคน (ไม่มีวงกลม) — คนที่ "ใช้งานอยู่" ไฮไลต์เขียว */
+.assignee-row.asg-card{grid-template-columns:1.4fr 1.2fr 1fr auto;align-items:end;gap:12px;border:1.5px solid var(--line);border-radius:var(--radius);padding:14px;background:#fff}
+.assignee-row.asg-card:has(.asg-current:checked){border-color:var(--green);background:linear-gradient(0deg,#fff,var(--green-bg))}
+.asg-acts{display:flex;gap:8px;align-items:center;height:var(--field-h)}
+.asg-pill{display:inline-flex;align-items:center;height:34px;border-radius:99px;border:1.5px solid var(--line);background:#fff;padding:0 12px;font-family:'Kanit',sans-serif;font-weight:600;font-size:12.5px;color:var(--ink-soft);cursor:pointer;white-space:nowrap;margin:0}
+.asg-pill input{display:none}
+.asg-pill .on{display:none}
+.asg-pill:has(.asg-current:checked){background:var(--green);border-color:var(--green);color:#fff}
+.asg-pill:has(.asg-current:checked) .on{display:inline}
+.asg-pill:has(.asg-current:checked) .off{display:none}
+@media(max-width:820px){.assignee-row.asg-card{grid-template-columns:1fr}}
 .grid-5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
 .grid-vehicle{grid-template-columns:1fr 1fr 0.65fr}
 @media(max-width:720px){.grid-2,.grid-3,.grid-4,.grid-5,.grid-vehicle{grid-template-columns:1fr}}
@@ -2327,17 +2338,15 @@ function addAssigneeRow(data, isCurrent){
   data = data || { name: '', position: '', phone: '' };
   const wrap = document.getElementById('assigneesContainer');
   const row = document.createElement('div');
-  row.className = 'grid grid-4 assignee-row';
+  row.className = 'grid grid-4 assignee-row asg-card';
   row.style.marginBottom = '8px';
   row.innerHTML = `
     <div class="field"><label>ชื่อ-นามสกุล</label><input type="text" class="asg-name" value="${escapeHtml(data.name || '')}" placeholder="เช่น นางสาวนันท์นภัสธ์ รัตนเสถียร"></div>
     <div class="field"><label>ตำแหน่ง</label><input type="text" class="asg-position" value="${escapeHtml(data.position || '')}"></div>
     <div class="field"><label>เบอร์โทร</label><input type="text" class="asg-phone" value="${escapeHtml(data.phone || '')}"></div>
-    <div class="field"><label>&nbsp;</label>
-      <div style="display:flex;gap:10px;align-items:center;height:36px">
-        <label style="display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap"><input type="radio" name="asgCurrent" class="asg-current"${isCurrent ? ' checked' : ''}> ใช้งานอยู่</label>
-        <button type="button" class="btn btn-outline btn-sm del-item">ลบ</button>
-      </div>
+    <div class="asg-acts">
+      <label class="asg-pill"><input type="radio" name="asgCurrent" class="asg-current"${isCurrent ? ' checked' : ''}><span class="on">✓ ใช้งานอยู่</span><span class="off">ตั้งเป็นผู้ใช้งาน</span></label>
+      <button type="button" class="btn btn-outline btn-sm del-item">ลบ</button>
     </div>`;
   wrap.appendChild(row);
   row.querySelector('.del-item').addEventListener('click', () => row.remove());
