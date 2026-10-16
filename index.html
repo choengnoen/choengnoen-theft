@@ -912,6 +912,12 @@ input.dq-bad{border-color:var(--rust)!important;background:var(--rust-bg)}
 .it-search input{height:var(--field-h);box-sizing:border-box}
 .dsel.it-preset .dsel-btn{height:var(--field-h);box-sizing:border-box;padding-top:0;padding-bottom:0}
 .it-toolbar .btn{height:var(--field-h)}
+/* แถวค้นหา/ดึงชุด/เพิ่มรายการ ใช้คอลัมน์เดียวกับตารางรายการ: ค้นหา=ชื่อ+จำนวน · ดึงชุด=หน่วย+ราคา · เพิ่มรายการ=เป็นเงิน+ปุ่มลบ */
+.it-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 118px 92px 104px 112px 34px;gap:8px;align-items:start}
+.it-toolbar .it-search{grid-column:span 2;min-width:0}
+.it-toolbar .it-preset,.dsel.it-preset{grid-column:span 2;width:100%;min-width:0}
+.it-toolbar #btnAddItem{grid-column:span 2;width:100%}
+@media(max-width:720px){.it-toolbar{grid-template-columns:1fr 1fr}.it-toolbar .it-search{grid-column:span 2}.it-toolbar .it-preset,.dsel.it-preset,.it-toolbar #btnAddItem{grid-column:span 1}}
 .em-kadd input{height:var(--field-h);box-sizing:border-box}
 .dsel-stack{display:grid;min-width:0}
 .dsel-stack > span{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
