@@ -4666,7 +4666,7 @@ function renderTable(){
   });
 
   tbody.querySelectorAll('tr').forEach(tr => {
-    tr.addEventListener('click', () => {
+    tr.addEventListener('dblclick', () => {
       const rec = rows[Array.from(tbody.children).indexOf(tr)];
       if (rec) openCaseDetailModal(rec.id);
     });
@@ -5459,7 +5459,7 @@ function renderFollowUp(){
     goToFilteredList(year, 'open');
     if (hw !== undefined) { document.getElementById('filterHighway').value = hw; renderTable(); }
   };
-  el.querySelectorAll('.follow-row').forEach(row => { row.onclick = () => openCaseDetailModal(row.dataset.id); });
+  el.querySelectorAll('.follow-row').forEach(row => { row.ondblclick = () => openCaseDetailModal(row.dataset.id); });
   el.querySelectorAll('.backlog-row').forEach(row => {
     row.onclick = () => row.dataset.hw !== undefined ? goList(dashYear, row.dataset.hw) : goList(row.dataset.fy);
   });
