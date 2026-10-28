@@ -1590,7 +1590,7 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <table class="data" id="dataTable">
           <thead>
             <tr>
-              <th style="width:12%">วันที่</th><th style="width:21%">สายทาง / กม.</th><th style="width:19%">สภ. / บริเวณ</th>
+              <th style="width:12%">วันที่</th><th style="width:21%">สายทาง / กม.</th><th style="width:19%">สภ. / เลขรับแจ้งความ</th>
               <th style="width:19%">ทรัพย์สินที่เสียหาย</th><th class="money-th" style="width:13%">มูลค่าเสียหาย</th><th class="repair-th" style="width:16%">สถานะคดี</th>
             </tr>
           </thead>
@@ -4674,8 +4674,8 @@ function renderTable(){
     tr.style.cursor = 'pointer';
     tr.innerHTML = `
       <td class="case-cell nowrap-cell"><b>${formatThaiDate(r.dateIncident)}</b>${dqBadgeHtml(r)}<span class="c-sub">${r.fiscalYear || ''}-${seqMap[r.id] || ''}</span></td>
-      <td class="hw-cell nowrap-cell">ทล.${escapeHtml(r.highway)} · กม.${escapeHtml(formatKm(r.km))}<span class="c-sub">${escapeHtml(r.section)}</span></td>
-      <td class="nowrap-cell violator-cell">${escapeHtml(r.policeStation || '-')}${r.location ? `<span class="c-sub">${escapeHtml(r.location)}</span>` : ''}${policeCaseNo(r) ? `<span class="c-sub mono">${escapeHtml(policeCaseNo(r))}</span>` : ''}</td>
+      <td class="hw-cell nowrap-cell">ทล.${escapeHtml(r.highway)} · กม.${escapeHtml(formatKm(r.km))}<span class="c-sub">${escapeHtml(r.section)}</span>${r.location ? `<span class="c-sub">${escapeHtml(r.location)}</span>` : ''}</td>
+      <td class="nowrap-cell violator-cell">${escapeHtml(r.policeStation || '-')}${policeCaseNo(r) ? `<span class="c-sub mono">${escapeHtml(policeCaseNo(r))}</span>` : ''}</td>
       <td class="items-cell">${itemsSummaryHtml(r)}</td>
       <td class="mono nowrap-cell money-cell">${formatMoney(r.totalPrice)}</td>
       <td class="repair-cell">${statusPill(r.status)}</td>
