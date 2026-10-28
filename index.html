@@ -1585,8 +1585,8 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         <table class="data" id="dataTable">
           <thead>
             <tr>
-              <th style="width:12%">วันที่</th><th style="width:20%">สายทาง / กม.</th><th style="width:19%">สภ. / บริเวณ</th>
-              <th style="width:15%">เลขรับแจ้งความ</th><th style="width:10%">มูลค่าเสียหาย</th><th style="width:10%">ผู้ต้องสงสัย</th><th class="repair-th" style="width:14%">สถานะคดี</th>
+              <th style="width:12%">วันที่</th><th style="width:22%">สายทาง / กม.</th><th style="width:21%">สภ. / บริเวณ</th>
+              <th style="width:15%">เลขรับแจ้งความ</th><th style="width:14%">มูลค่าเสียหาย</th><th class="repair-th" style="width:16%">สถานะคดี</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -4650,11 +4650,6 @@ function statusPill(status){
   const cls = status === 'ปิดคดี' ? 'done' : status === 'จับกุมผู้ต้องหาได้' ? 'info' : status === 'อยู่ระหว่างสอบสวน' ? 'warn' : 'pending';
   return `<span class="status-pill ${cls}">${escapeHtml(status)}</span>`;
 }
-function suspectCellHtml(r){
-  if (r.suspectStatus === 'พบ') return '<b style="color:var(--rust)">พบ</b>' + (r.suspectName ? `<span class="c-sub">${escapeHtml(r.suspectName)}</span>` : '');
-  if (r.suspectStatus === 'ไม่พบ') return 'ไม่พบ';
-  return '<span style="color:var(--ink-mute)">-</span>';
-}
 function renderTable(){
   populateYearFilter();
   populateStationFilter();
@@ -4678,7 +4673,6 @@ function renderTable(){
       <td class="nowrap-cell violator-cell">${escapeHtml(r.policeStation || '-')}${r.location ? `<span class="c-sub">${escapeHtml(r.location)}</span>` : ''}</td>
       <td class="mono nowrap-cell">${escapeHtml(policeCaseNo(r) || '-')}</td>
       <td class="mono nowrap-cell">${formatMoney(r.totalPrice)}</td>
-      <td class="nowrap-cell">${suspectCellHtml(r)}</td>
       <td class="repair-cell">${statusPill(r.status)}</td>
     `;
     tbody.appendChild(tr);
