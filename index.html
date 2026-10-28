@@ -5234,15 +5234,13 @@ function openCaseDetailModal(id){
   let docCls = 'n', docSub = repStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันแจ้งความ', docNote = '';
   if (sentStr) {
     docCls = 'ok'; docSub = escapeHtml(formatThaiDateFull(sentStr));
-    if (wd && repStr) { const late = -wd.workLeft(sentStr, wd.addWorkdays(repStr, 10)); if (late > 0) docNote = 'ส่งช้า ' + late + ' วันทำการ'; }
   } else if (isClosed) {
     docSub = 'ไม่ได้บันทึกวันส่ง';
   } else if (wd && repStr) {
-    const due = wd.addWorkdays(repStr, 10), left = wd.workLeft(todayStr, due);
-    docNote = 'กำหนด ' + escapeHtml(formatThaiDateFull(due));
-    if (left < 0) { docCls = 'bad'; docSub = 'เลยกำหนด <span class="cd-nw">' + (-left) + ' วันทำการ</span>'; }
-    else if (left === 0) { docCls = 'bad'; docSub = due < todayStr ? 'เลยกำหนดแล้ว' : 'ครบกำหนดวันนี้'; }
-    else { docCls = 'warn'; docSub = 'เหลือ <span class="cd-nw">' + left + ' วันทำการ</span>'; }
+    // แสดงวันที่ต้องส่งเอกสาร ไม่แสดงจำนวนวันทำการที่เหลือ/เลย — สีแดงบอกว่าเลยกำหนดแล้ว
+    const due = wd.addWorkdays(repStr, 10);
+    docCls = due <= todayStr ? 'bad' : 'warn';
+    docSub = 'กำหนดส่ง ' + escapeHtml(formatThaiDateFull(due));
   }
   const suspectStep = rec.suspectStatus === 'พบ' ? step('ok', 'ผู้ต้องสงสัย', 'พบ' + (rec.suspectName ? ' · ' + escapeHtml(rec.suspectName) : ''))
     : rec.suspectStatus === 'ไม่พบ' ? step('warn', 'ผู้ต้องสงสัย', 'ยังไม่พบ')
