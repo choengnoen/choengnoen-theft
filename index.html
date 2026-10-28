@@ -165,15 +165,23 @@ h1,h2,h3,.display{font-family:'Kanit',sans-serif;font-weight:700}
 .g12{grid-template-columns:repeat(12,minmax(0,1fr))}
 .g12 .c2{grid-column:span 2}.g12 .c3{grid-column:span 3}.g12 .c4{grid-column:span 4}.g12 .c5{grid-column:span 5}.g12 .c6{grid-column:span 6}.g12 .c12{grid-column:span 12}
 @media(max-width:720px){.g12{grid-template-columns:repeat(2,minmax(0,1fr))}.g12 .c2,.g12 .c3{grid-column:span 1}.g12 .c4,.g12 .c5,.g12 .c6,.g12 .c12{grid-column:span 2}}
-.send-hero{display:flex;align-items:center;gap:14px;margin-top:12px;padding:12px 14px;border:1.5px solid #e8761a;background:#fff4e8;border-radius:12px}
-.send-hero .sh-ic{width:38px;height:38px;border-radius:50%;background:#e8761a;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
-.send-hero .sh-tx{flex:1;min-width:0}
-.send-hero .sh-tx b{display:block;font-size:14.5px;font-weight:600;color:#7a3a07}
-.send-hero .sh-tx span{font-size:12px;color:#9a5a1e}
-.send-hero .sh-chip{font-size:12px;padding:3px 10px;border-radius:99px;background:#fde7c8;color:#8a4a0a;white-space:nowrap;flex:none}
-.send-hero .sh-chip.done{background:#dcf3e4;color:#17713b}
-.send-hero input[type=date]{width:180px;flex:none;border-color:#e8761a}
-@media(max-width:720px){.send-hero{flex-wrap:wrap}.send-hero .sh-tx{flex:1 1 60%}.send-hero input[type=date]{width:100%}}
+/* ส่งเอกสารถึงแขวง — แบบเดียวกับระบบชี้แนวเขต: การ์ดวันครบกำหนดเด่นทางซ้าย · ช่องกรอกทางขวา */
+.send-a{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:stretch;margin-top:12px}
+.send-hero{border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:4px;color:#fff;background:linear-gradient(135deg,#175f87,#08324c)}
+.send-hero small{color:rgba(255,255,255,.78);font-size:13px}
+.send-hero .big{font-size:44px;font-weight:700;line-height:1.05;font-family:'Kanit','Sarabun',sans-serif}
+.send-hero .big span{font-size:16px;font-weight:600;margin-left:4px;font-family:'Sarabun',sans-serif}
+.send-hero .big.due span{font-size:22px;font-family:'Kanit','Sarabun',sans-serif;margin-left:6px}
+.send-hero .sh-st{align-self:flex-start;margin:4px 0 2px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.2);font-size:12.5px;font-weight:600;color:#fff}
+.send-hero.near{background:linear-gradient(135deg,#d9790f,#a3660a)}
+.send-hero.bad{background:linear-gradient(135deg,#d2503d,#9c2e20)}
+.send-hero.ontime{background:linear-gradient(135deg,#25a367,#14693d)}
+.send-hero.na{background:linear-gradient(135deg,#8792a0,#5d6875)}
+.send-right{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:12px;align-items:center;padding-right:56px;min-width:0}
+.send-right b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.send-right .sr-sub{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
+.send-right input[type=date]{width:100%}
+@media(max-width:720px){.send-a{grid-template-columns:1fr}.send-right{grid-template-columns:1fr;padding-right:0}}
 .fgrp{border:1px dashed var(--line);border-radius:12px;padding:12px 14px 14px;margin-top:12px}
 .fgrp:first-of-type{margin-top:0}
 .ad-show{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 12px;border:1px solid #bfe3cc;background:#eef8f1;border-radius:10px;font-size:14px;white-space:nowrap;overflow:hidden}
@@ -1504,11 +1512,12 @@ tr.route-editable:hover td{background:var(--amber-glow)}
         </div>
       </div>
       <!-- แผน 14: ติดตามนำส่งเอกสารถึงแขวงภายใน 10 วัน (นับจากวันแจ้งความ) — ระบบแจ้งเตือน LINE อ่านสองช่องนี้ -->
-      <div class="send-hero">
-        <div class="sh-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></div>
-        <div class="sh-tx"><b>ส่งเอกสารถึงแขวงเมื่อ</b><span>วันที่เจ้าหน้าที่ส่งเรื่องให้แขวงดำเนินการต่อ</span></div>
-        <span class="sh-chip" id="sentChip">ยังไม่ส่ง</span>
-        <input type="date" id="f_sentToDistrictDate">
+      <div class="send-a">
+        <div class="send-hero" id="sendHero"></div>
+        <div class="send-right">
+          <div><b>วันที่ส่งเอกสารไปแขวง</b><span class="sr-sub" id="sendSub"></span></div>
+          <input type="date" id="f_sentToDistrictDate" title="วันที่ส่งเอกสารถึงแขวง">
+        </div>
       </div>
       </div>
 
@@ -3597,14 +3606,42 @@ function findZone(hw, km, side){
 let zoneLastAuto = null; // ค่าที่ระบบเติมให้ล่าสุด — ถ้าเจ้าหน้าที่แก้เองแล้วจะไม่ถูกเขียนทับ
 let mooLastAuto = null; // หมู่ที่ระบบเติมให้อัตโนมัติล่าสุด (มีตัวเลือกเดียว) — เจ้าหน้าที่เปลี่ยนเองแล้วจะไม่ถูกเขียนทับ
 function zoneFieldIds(){ return { station: 'f_policeStation', tambon: 'f_tambon', amphoe: 'f_amphoe', changwat: 'f_changwat' }; }
-/* ป้ายสถานะ "ยังไม่ส่ง / ส่งแล้ว" ของกรอบส่งเอกสารถึงแขวง */
+/* การ์ดกำหนดส่งเอกสารถึงแขวง (แบบเดียวกับระบบชี้แนวเขต): ครบกำหนด = วันแจ้งความ + 10 วันทำการ (นับแบบเดียวกับรายการร่าง/LINE)
+   วันครบกำหนดเป็นจุดเด่น · จำนวนวันทำการที่เหลือ/เกินเป็นป้ายรอง */
+const SEND_LIMIT_DAYS = 10;
 function syncSentChip(){
-  const v = document.getElementById('f_sentToDistrictDate').value;
-  const c = document.getElementById('sentChip');
-  c.textContent = v ? 'ส่งแล้ว' : 'ยังไม่ส่ง';
-  c.classList.toggle('done', !!v);
+  renderSendHero('แจ้งความ', document.getElementById('f_reportedDate').value, document.getElementById('f_sentToDistrictDate').value,
+    document.getElementById('f_status').value === 'ปิดคดี' ? 'ปิดคดีแล้ว' : '');
 }
-['input','change'].forEach(ev => document.getElementById('f_sentToDistrictDate').addEventListener(ev, syncSentChip));
+function renderSendHero(startLabel, start, sent, doneText){
+  const box = document.getElementById('sendHero');
+  const today = todayIso();
+  let due = '';
+  try { if (start && window.DRAFTS) due = DRAFTS.addWorkdays(start, SEND_LIMIT_DAYS); } catch (e) { due = ''; }
+  let cls = '', head = 'ครบกำหนดส่งแขวง', big = '', st = '', foot = '';
+  if (!due) { cls = 'na'; head = 'ต้องส่งแขวงภายใน'; big = SEND_LIMIT_DAYS + '<span>วันทำการ</span>'; foot = 'นับจากวัน' + startLabel; }
+  else {
+    const p = formatThaiDate(due).split(' ');
+    big = escapeHtml(p[0]) + '<span>' + escapeHtml(p.slice(1).join(' ')) + '</span>';
+    if (sent) {
+      const late = -DRAFTS.workLeft(sent, due);
+      if (late > 0) { cls = 'bad'; st = 'ส่งเกินกำหนด ' + late + ' วันทำการ'; } else { cls = 'ontime'; st = 'ส่งทันกำหนด'; }
+      foot = 'ส่งแขวงเมื่อ ' + formatThaiDate(sent);
+    } else {
+      foot = 'นับ ' + SEND_LIMIT_DAYS + ' วันทำการจากวัน' + startLabel;
+      const left = DRAFTS.workLeft(today, due);
+      if (doneText) { cls = 'na'; st = doneText; }
+      else if (left < 0) { cls = 'bad'; st = 'เกินกำหนด ' + (-left) + ' วันทำการ'; }
+      else if (left <= 1) { cls = 'near'; st = left === 0 ? 'ครบกำหนดวันนี้' : 'เหลือ 1 วันทำการ'; }
+      else st = 'เหลือ ' + left + ' วันทำการ';
+    }
+  }
+  box.className = 'send-hero' + (cls ? ' ' + cls : '');
+  box.innerHTML = `<small>${head}</small><div class="big${due ? ' due' : ''}">${big}</div>`
+    + (st ? `<span class="sh-st">${escapeHtml(st)}</span>` : '') + `<small>${escapeHtml(foot)}</small>`;
+  document.getElementById('sendSub').textContent = start ? startLabel + 'เมื่อ ' + formatThaiDate(start) : '';
+}
+['f_sentToDistrictDate', 'f_reportedDate', 'f_status'].forEach(id => ['input','change'].forEach(ev => document.getElementById(id).addEventListener(ev, syncSentChip)));
 /* อำเภอ · จังหวัด: แสดงเป็นแถบอัตโนมัติ กด "แก้" เพื่อพิมพ์ทับ (ช่อง f_amphoe/f_changwat ยังเป็นตัวเก็บค่าเดิม) */
 function syncAmphoeDisplay(){
   const a = document.getElementById('f_amphoe').value.trim();
@@ -4603,6 +4640,7 @@ function prefillFormFromDraft(p){
   updateKmHint();
   updateZoneFields();
   try { refreshFormChecks(); } catch (e) { /* ข้าม */ }
+  syncSentChip();
   openFormModal();
   showToast('ดึงข้อมูลจากรายการร่างแล้ว กรอกรายละเอียดต่อและกดบันทึก');
 }
