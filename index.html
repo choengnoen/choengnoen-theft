@@ -5231,28 +5231,30 @@ function openCaseDetailModal(id){
   const repStr = normalizeDateStr(rec.reportedDate);
   const sentStr = normalizeDateStr(rec.sentToDistrictDate);
   const wd = window.DRAFTS && DRAFTS.addWorkdays && DRAFTS.workLeft ? DRAFTS : null;
+  // วันที่ในเส้นสถานะใช้แบบย่อ (25 ส.ค. 69) และห้ามตัดบรรทัดกลางวันที่
+  const sd = s => '<span class="cd-nw">' + escapeHtml(formatThaiDate(s)) + '</span>';
   let docCls = 'n', docSub = repStr ? 'ยังไม่ระบุวันส่ง' : 'ยังไม่ระบุวันแจ้งความ', docNote = '';
   if (sentStr) {
-    docCls = 'ok'; docSub = escapeHtml(formatThaiDateFull(sentStr));
+    docCls = 'ok'; docSub = sd(sentStr);
   } else if (isClosed) {
     docSub = 'ไม่ได้บันทึกวันส่ง';
   } else if (wd && repStr) {
     // แสดงวันที่ต้องส่งเอกสาร ไม่แสดงจำนวนวันทำการที่เหลือ/เลย — สีแดงบอกว่าเลยกำหนดแล้ว
     const due = wd.addWorkdays(repStr, 10);
     docCls = due <= todayStr ? 'bad' : 'warn';
-    docSub = 'กำหนดส่ง ' + escapeHtml(formatThaiDateFull(due));
+    docSub = 'กำหนดส่ง ' + sd(due);
   }
   const suspectStep = rec.suspectStatus === 'พบ' ? step('ok', 'ผู้ต้องสงสัย', 'พบ' + (rec.suspectName ? ' · ' + escapeHtml(rec.suspectName) : ''))
     : rec.suspectStatus === 'ไม่พบ' ? step('warn', 'ผู้ต้องสงสัย', 'ยังไม่พบ')
     : step('n', 'ผู้ต้องสงสัย', 'ยังไม่ระบุ');
   const tilesHtml = `${issuesBoxHtml(rec)}<div class="cd-prog">
       <ol class="cd-steps">
-        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? escapeHtml(formatThaiDateFull(incStr)) : 'ยังไม่ระบุ')}
-        ${step(repStr ? 'ok' : 'n', 'แจ้งความ', repStr ? escapeHtml(formatThaiDateFull(repStr)) : 'ยังไม่ระบุ')}
+        ${step(incStr ? 'ok' : 'n', 'เกิดเหตุ', incStr ? sd(incStr) : 'ยังไม่ระบุ')}
+        ${step(repStr ? 'ok' : 'n', 'แจ้งความ', repStr ? sd(repStr) : 'ยังไม่ระบุ')}
         ${step(docCls, 'ส่งเอกสารถึงแขวง', docSub, docNote)}
         ${step(isClosed ? 'ok' : (rec.status ? 'warn' : 'n'), 'สถานะคดี', escapeHtml(rec.status || 'ยังไม่ระบุ'))}
         ${suspectStep}
-        ${step(isClosed ? 'ok' : 'warn', 'ปิดคดี', isClosed ? (rec.closedDate ? escapeHtml(formatThaiDateFull(rec.closedDate)) : 'ปิดแล้ว') : 'ยังไม่ปิดคดี')}
+        ${step(isClosed ? 'ok' : 'warn', 'ปิดคดี', isClosed ? (rec.closedDate ? sd(rec.closedDate) : 'ปิดแล้ว') : 'ยังไม่ปิดคดี')}
       </ol>
       <div class="cd-age"><span>${isClosed ? 'ใช้เวลาจนปิดคดี' : 'ระยะเวลาค้าง'}</span><b>${days === null ? '-' : days.toLocaleString('th-TH') + ' วัน'}</b></div>
     </div>`;
